@@ -1,16 +1,14 @@
-name: Test & Publish to TestPyPI
+name: Pull Request Checks
 
 on:
-  release:
-    types: [created]
+  pull_request:
+    branches: ["main"]
 
 jobs:
-  test:
-    name: Run tests and checks
+  checks:
+    name: Lint, Type-Check & Test
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write  # нужно для OIDC
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,15 +27,6 @@ jobs:
       - name: Configure Poetry
         run: poetry config virtualenvs.in-project true
 
-      - name: Cache virtual environment
-        id: cache-venv
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-
-
       - name: Install dependencies
         run: poetry install --no-interaction --no-root
 
@@ -49,9 +38,3 @@ jobs:
 
       - name: Run tests
         run: poetry run pytest -v
-      
-      - name: Build package
-        run: poetry build
-
-      - name: Publish to TestPyPI (using OIDC)
-        uses: pypa/gh-action-pypi-publish@release/v1
