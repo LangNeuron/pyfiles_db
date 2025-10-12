@@ -1,33 +1,93 @@
-name: Publish to TestPyPI via OIDC
+name: Test & Publish to TestPyPI
 
 on:
   push:
     branches: [main]
 
 jobs:
-  publish-test:
-    name: Publish to TestPyPI
+  test:
+    name: Run tests and checks
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write      # нужно для OIDC
-      contents: read
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "poetry"  # автоматическое кеширование Poetry-зависимостей
 
-      - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Install Poetry via pipx
+        uses: pipxproject/action-pipx-install@v1
+        with:
+          package: poetry
 
-      - name: Install dependencies
-        run: poetry install
+      - name: Configure Poetry to use virtualenv in project
+        run: poetry config virtualenvs.in-project true
+
+      - name: Cache virtual environment
+        id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
+
+      - name: Install dependencies (only if cache miss)
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Lint with Ruff
+        run: poetry run ruff check .
+
+      - name: Type check with MyPy
+        run: poetry run mypy .
+
+      - name: Run tests
+        run: poetry run pytest -v
+
+
+  publish:
+    name: Publish to TestPyPI
+    needs: [test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # для OpenID Connect
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "poetry"
+
+      - name: Install Poetry via pipx
+        uses: pipxproject/action-pipx-install@v1
+        with:
+          package: poetry
+
+      - name: Configure Poetry to use virtualenv in project
+        run: poetry config virtualenvs.in-project true
+
+      - name: Cache virtual environment
+        id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
+
+      - name: Install dependencies (only if cache miss)
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
 
       - name: Build package
         run: poetry build

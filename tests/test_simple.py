@@ -12,4 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Init file for python package."""
+"""Simple test."""
+
+def test_simple() -> None:
+    """Simple test."""
+    return
