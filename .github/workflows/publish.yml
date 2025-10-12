@@ -85,7 +85,7 @@ jobs:
             venv-${{ runner.os }}-
 
       - name: Install build dependencies
-        run: poetry install --only main --no-interaction
+        run: poetry install
 
       - name: Build package
         run: poetry build
