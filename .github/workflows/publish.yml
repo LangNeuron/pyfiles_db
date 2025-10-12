@@ -1,0 +1,38 @@
+name: Publish to TestPyPI via OIDC
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish-test:
+    name: Publish to TestPyPI
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write      # нужно для OIDC
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Build package
+        run: poetry build
+
+      - name: Publish to TestPyPI (using OIDC)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
