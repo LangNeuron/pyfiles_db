@@ -17,14 +17,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "poetry"  # автоматическое кеширование Poetry-зависимостей
+          cache: "poetry"
 
-      - name: Install Poetry via pipx
-        uses: pipxproject/action-pipx-install@v1
-        with:
-          package: poetry
+      - name: Install Poetry
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install poetry
 
-      - name: Configure Poetry to use virtualenv in project
+      - name: Configure Poetry
         run: poetry config virtualenvs.in-project true
 
       - name: Cache virtual environment
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write  # для OpenID Connect
+      id-token: write  # нужно для OIDC
 
     steps:
       - name: Checkout repository
@@ -68,12 +68,12 @@ jobs:
           python-version: "3.12"
           cache: "poetry"
 
-      - name: Install Poetry via pipx
-        uses: pipxproject/action-pipx-install@v1
-        with:
-          package: poetry
+      - name: Install Poetry
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install poetry
 
-      - name: Configure Poetry to use virtualenv in project
+      - name: Configure Poetry
         run: poetry config virtualenvs.in-project true
 
       - name: Cache virtual environment
