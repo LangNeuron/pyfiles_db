@@ -1,0 +1,60 @@
+[project]
+name = "pyfiles-db"
+version = "0.1.0"
+description = "Lightweight file-system database for Python projects."
+authors = [
+    {name = "Anton Golubchikov",email = "anton1programmist@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+keywords = ["database", "filesystem", "json", "embedded", "fastapi"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent"
+]
+dependencies = [
+]
+
+license-files = ["LICENSE"]
+
+[tool.poetry]
+packages = [{include = "pyfiles_db", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project.urls]
+"Homepage" = "https://github.com/LangNeuron/pyfiles_db"
+"Bug Tracker" = "https://github.com/LangNeuron/pyfiles_db/issues"
+
+
+# tools
+
+[tool.ruff]
+line-length = 80
+
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ALL"]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 80
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+# Mypy configuration
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_configs = true
+
+# pytets configuration
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
