@@ -23,6 +23,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install poetry
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Configure Poetry
         run: poetry config virtualenvs.in-project true
@@ -36,8 +37,7 @@ jobs:
           restore-keys: |
             venv-${{ runner.os }}-
 
-      - name: Install dependencies (only if cache miss)
-        if: steps.cache-venv.outputs.cache-hit != 'true'
+      - name: Install dependencies
         run: poetry install --no-interaction --no-root
 
       - name: Lint with Ruff
@@ -72,6 +72,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install poetry
+          echo "$HOME/.local/bin" >> $GITHUB_PATH  # добавляем Poetry в PATH
 
       - name: Configure Poetry
         run: poetry config virtualenvs.in-project true
@@ -85,9 +86,8 @@ jobs:
           restore-keys: |
             venv-${{ runner.os }}-
 
-      - name: Install dependencies (only if cache miss)
-        if: steps.cache-venv.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
+      - name: Install build dependencies
+        run: poetry install --only main --no-interaction
 
       - name: Build package
         run: poetry build
