@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Init library."""
+"""Errors."""
 
-from .files_db import FilesDB
 
-__all__ = ["FilesDB"]
+from .error_db_not_loaded import DbNotLoadedError
+
+__all__ = ["DbNotLoadedError"]
