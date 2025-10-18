@@ -15,6 +15,7 @@
 """Errors."""
 
 
+from .eror_path_not_avaible import PathNotAvaibleError
 from .error_db_not_loaded import DbNotLoadedError
 
-__all__ = ["DbNotLoadedError"]
+__all__ = ["DbNotLoadedError", "PathNotAvaibleError"]

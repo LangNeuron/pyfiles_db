@@ -12,18 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Eror DbNotLoadedError."""
 
-"""Test for initialaize Class."""
+class PathNotAvaibleError(FileNotFoundError):
+    """Error DbNotLoadedError.
 
+    Parameters
+    ----------
+    FileNotFoundError : _type_
+        File exception
+    """
 
-from src.pyfiles_db import FilesDB
+    def __str__(self) -> str:
+        """Print Exception.
 
-# Errors message
-SINGLTON_ERROR_MSG = """Singlton Error"""
-
-
-def test_init_storage() -> None:
-    """Test for initialize simple FilesDB configuration."""
-    file_db = FilesDB()
-    file_db.init()
-
+        Returns
+        -------
+        str
+            String info message
+        """
+        return "Database File not avaible"

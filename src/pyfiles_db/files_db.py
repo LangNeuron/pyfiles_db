@@ -23,19 +23,17 @@ except ImportError:
 
 
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
-from .errors import DbNotLoadedError
+from .errors import PathNotAvaibleError
 
-BASE_PATH_STORAGE = Path(__file__).parent.parent / "database"
+BASE_PATH_STORAGE = Path(__file__).parent.parent.parent / "database"
 
 
 class FilesDB:
     """FilesDB, manager for DB."""
 
     _instance: Self | None = None
-
-    _db_loaded: dict[str | Path, tuple[object, dict[str, Any]]] | None = None
 
     def __new__(cls: type[Self]) -> Self:
         """
@@ -50,30 +48,52 @@ class FilesDB:
             cls._instance = super().__new__(cls)
         return cast("Self", cls._instance)
 
-    def init(self, storage: Path | str | None = None) -> object:
-        """Initinalize a new database or get new copy of existing one."""
+    def init(self,
+             storage: Path | str | None = None,
+             *,
+             asyncbd: bool = False,
+            ) -> object:
+        """Initinalize a new database.
+
+        If database is already loaded - connection
+        If database is not loaded - create new one
+
+        PARAMS
+        ------
+        sorage: str | Path
+          Storage path
+        """
         if storage is None:
             storage = BASE_PATH_STORAGE
-        else:
-            self._check_storage(storage=storage)
-        if self._db_loaded is None:
-            return self._new_db(storage=storage)
-        if storage in self._db_loaded:
-            return self._get_db(storage=storage)
-        return self._new_db(storage=storage)
+        if self._check_storage(storage=storage):
+            self._create_base_meta_information()
+        return self._connect(storage=storage, asyncbd=asyncbd)
 
-    def _new_db(self, storage: str | Path) -> object:
+    def _connect(self, storage: str | Path, *, asyncbd: bool = False) -> object:
+        # TODO: change connection with meta information
+        if asyncbd:
+            return _DBasync(storage=storage)
         return _DBsync(storage=storage)
 
-    def _check_storage(self, storage: str | Path) -> None:
-        """Check storage (path)."""
-        # TODO: check path for avaible
+    def _create_base_meta_information(self) -> None:
+        """Create meta information."""
 
-    def _get_db(self, storage: str | Path) -> object:
-        if self._db_loaded is None:
-            raise DbNotLoadedError # TODO: ERROR specifical
-        return self._db_loaded[storage][0]
+    def _check_storage(self, storage: str | Path) -> bool:
+        """Check storage (path)."""
+        storage = Path(storage)
+        storage.mkdir(parents=True, exist_ok=True)
+        if not storage.exists():
+            raise PathNotAvaibleError
+        if not storage.is_dir():
+            raise NotADirectoryError
+        return not (storage / "meta.json").exists()
+
+
 
 class _DBsync:
+    def __init__(self, storage: str | Path) -> None:
+        self.storage = storage
+
+class _DBasync:
     def __init__(self, storage: str | Path) -> None:
         self.storage = storage
