@@ -23,11 +23,12 @@ except ImportError:
 
 
 import json
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
-from .errors import PathNotAvaibleError
+from .errors import PathNotAvaibleError, TableAlredyAvaibleError
 
 BASE_PATH_STORAGE = Path(__file__).parent.parent.parent / "database"
 
@@ -39,6 +40,8 @@ class META:
 
     TABLES: str = "TABLES"
     ENCRYPTDB: str = "ENCRYPTDB"
+    COLUMNS: str = "COLUMNS"
+    TABLE_PREFIX: str = "TABLE_PREFIX"
 
 
 class FilesDB:
@@ -65,16 +68,25 @@ class FilesDB:
              asyncbd: bool = False,
              meta_file: str = "meta.json",
              **meta: dict[str, Any],
-            ) -> object:
+            ) -> _DB:
         """Initinalize a new database.
 
         If database is already loaded - connection
         If database is not loaded - create new one
 
-        PARAMS
-        ------
-        sorage: str | Path
-          path to database location
+        Parameters
+        ----------
+        storage : Path | str | None, optional
+            path to databse location, by default None
+        asyncbd : bool, optional
+            use async io database, by default False
+        meta_file : str, optional
+            name of meta file, by default "meta.json"
+
+        Returns
+        -------
+        _DB
+            base database structure
         """
         self._meta_file = meta_file
         if storage is None:
@@ -83,7 +95,7 @@ class FilesDB:
             self._create_base_meta_information(storage, meta=meta)
         return self._connect(storage=storage, asyncbd=asyncbd)
 
-    def _connect(self, storage: str | Path, *, asyncbd: bool = False) -> object:
+    def _connect(self, storage: str | Path, *, asyncbd: bool = False) -> _DB:
         """Connect to database, load meta information.
 
         Parameters
@@ -91,12 +103,12 @@ class FilesDB:
         storage : str | Path
             path to database location
         asyncbd : bool, optional
-            async io database, by default False
+            use async io database, by default False
 
         Returns
         -------
-        object
-            object of database loader
+        _DB
+            _DB instance of database loader
         """
         if asyncbd:
             return _DBasync(storage=storage, meta_file=self._meta_file)
@@ -113,6 +125,7 @@ class FilesDB:
         return {
             META.TABLES: [],
             META.ENCRYPTDB: False,
+            META.TABLE_PREFIX: "TABLE_",
         }
 
     def _valid_key_value(self, key: str, value: Any) -> None:  # noqa: ANN401
@@ -167,6 +180,8 @@ class FilesDB:
         ----------
         storage : str | Path
             path to database location
+        meta : dict[str, Any]
+           raw meta information from user
         """
         meta = self._configure_meta(meta)
         storage = Path(storage)
@@ -205,18 +220,112 @@ class FilesDB:
 
 
 
-class _DBsync:
+class _DB(ABC):
+    @abstractmethod
     def __init__(self, storage: str | Path, meta_file: str) -> None:
+        """Init databs.
+
+        Parameters
+        ----------
+        storage : str | Path
+            path to db location
+        meta_file : str
+           name of meta file
+        """
+
+    @abstractmethod
+    def create_table(self, table_name: str, columns: dict[str, str]) -> None:
+        """Craete a new table.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table
+        columns : dict[str, str]
+            columns with data type
+        """
+
+
+class _DBsync(_DB):
+    def __init__(self, storage: str | Path, meta_file: str) -> None:
+        """Init databs.
+
+        Parameters
+        ----------
+        storage : str | Path
+            path to db location
+        meta_file : str
+           name of meta file
+        """
         self._storage = Path(storage)
         self._meta_file = meta_file
         self._load_meta()
 
     def _load_meta(self) -> None:
+        """Load meta information from file."""
         with Path.open(self._storage / self._meta_file, "r") as f:
-            self.meta = json.load(f)
+            self._meta = json.load(f)
 
+    def create_table(self, table_name: str, columns: dict[str, str]) -> None:
+        """Create table.
 
-class _DBasync:
+        Parameters
+        ----------
+        table_name : str
+            name of table
+        columns : dict[str, str]
+            columns with data type
+
+        Raises
+        ------
+        TableAlredyAvaibleError
+            if table alredy avaible
+        """
+        # TODO: Table. columns is maybe {"USER_ID": "INT", "NAME": "TEXT"}
+        table = self._meta[META.TABLE_PREFIX] + table_name
+        if table in self._meta[META.TABLES]:
+            raise TableAlredyAvaibleError
+        self._mkdir_for_table(table)
+        self._meta[META.TABLES].append(table_name)
+        self._meta[table] = {META.COLUMNS: columns}
+        self._update_meta()
+
+    def _update_meta(self) -> None:
+        """Update meta file."""
+        with Path.open(self._storage / self._meta_file, mode="w") as f:
+            json.dump(self._meta, f)
+
+    def _mkdir_for_table(self, table: str | Path) -> None:
+        """Make table foleder.
+
+        Parameters
+        ----------
+        table : str | Path
+            name of table folder
+        """
+        Path(table).mkdir(parents=False, exist_ok=True)
+
+class _DBasync(_DB):
     def __init__(self, storage: str | Path, meta_file: str) -> None:
+        """Init databs.
+
+        Parameters
+        ----------
+        storage : str | Path
+            path to db location
+        meta_file : str
+           name of meta file
+        """
         self._storage = storage
         self._meta_file = meta_file
+
+    def create_table(self, table_name: str, columns: dict[str, Any]) -> None:
+        """Create table.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table
+        columns : dict[str, Any]
+            columns with data type
+        """

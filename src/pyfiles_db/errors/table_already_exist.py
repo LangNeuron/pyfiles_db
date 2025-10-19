@@ -12,11 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Errors."""
+"""Eror DbNotLoadedError."""
 
+class TableAlredyAvaibleError(Exception):
+    """Error DbNotLoadedError.
 
-from .eror_path_not_avaible import PathNotAvaibleError
-from .error_db_not_loaded import DbNotLoadedError
-from .table_already_exist import TableAlredyAvaibleError
+    Parameters
+    ----------
+    FileNotFoundError : _type_
+        File exception
+    """
 
-__all__ = ["DbNotLoadedError", "PathNotAvaibleError", "TableAlredyAvaibleError"]
+    def __str__(self) -> str:
+        """Print Exception.
+
+        Returns
+        -------
+        str
+            String info message
+        """
+        return "Table alredy avaible"
