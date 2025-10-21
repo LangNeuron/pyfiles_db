@@ -303,7 +303,7 @@ class _DBsync(_DB):
         table : str | Path
             name of table folder
         """
-        Path(table).mkdir(parents=False, exist_ok=True)
+        (self._storage / table).mkdir(parents=False, exist_ok=True)
 
 class _DBasync(_DB):
     def __init__(self, storage: str | Path, meta_file: str) -> None:
