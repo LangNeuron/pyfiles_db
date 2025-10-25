@@ -26,7 +26,7 @@ import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from .errors import (
     DataIsUncorrectError,
@@ -59,7 +59,7 @@ class META:
 class FilesDB:
     """FilesDB, manager for DB."""
 
-    _instance: Self | None = None
+    _instance: ClassVar[Self | None] = None
 
     def __new__(cls: type[Self]) -> Self:
         """
@@ -72,7 +72,7 @@ class FilesDB:
         """
         if not cls._instance:
             cls._instance = super().__new__(cls)
-        return cast("Self", cls._instance)
+        return cls._instance
 
     def init(self,
              storage: Path | str | None = None,

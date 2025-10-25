@@ -33,8 +33,14 @@ jobs:
       - name: Lint with Ruff
         run: poetry run ruff check .
 
+      - name: cd src
+        run: cd src
+
       - name: Type check with MyPy
         run: poetry run mypy .
+      
+      - name: cd ..
+        run: cd .. 
 
       - name: Run tests
         run: poetry run pytest -v
