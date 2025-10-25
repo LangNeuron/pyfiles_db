@@ -50,6 +50,8 @@ convention = "numpy"
 # Mypy configuration
 
 [tool.mypy]
+mypy_path = "src"
+explicit_package_bases = true
 python_version = "3.12"
 strict = true
 warn_unused_configs = true
@@ -57,7 +59,7 @@ warn_unused_configs = true
 # pytets configuration
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["."]
 [dependency-groups]
 dev = [
     "ruff (>=0.14.0,<0.15.0)",

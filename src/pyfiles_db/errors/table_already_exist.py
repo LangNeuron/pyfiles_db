@@ -12,8 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Init library."""
+"""Eror DbNotLoadedError."""
 
-from .files_db import FilesDB
+class TableAlredyAvaibleError(Exception):
+    """Error DbNotLoadedError.
 
-__all__ = ["FilesDB"]
+    Parameters
+    ----------
+    FileNotFoundError : _type_
+        File exception
+    """
+
+    def __str__(self) -> str:
+        """Print Exception.
+
+        Returns
+        -------
+        str
+            String info message
+        """
+        return "Table alredy avaible"

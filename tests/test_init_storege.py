@@ -12,8 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Init library."""
 
-from .files_db import FilesDB
+"""Test for initialaize Class."""
 
-__all__ = ["FilesDB"]
+
+from src.pyfiles_db import FilesDB
+
+# Errors message
+SINGLTON_ERROR_MSG = """Singlton Error"""
+
+
+def test_init_storage() -> None:
+    """Test for initialize simple FilesDB configuration."""
+    file_db = FilesDB()
+    file_db.init()
+

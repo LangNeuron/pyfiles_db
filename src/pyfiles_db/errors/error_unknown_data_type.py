@@ -12,8 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Init library."""
+"""Eror UnknownDataTypeError."""
 
-from .files_db import FilesDB
+class UnknownDataTypeError(Exception):
+    """Error UnknownDataTypeError.
 
-__all__ = ["FilesDB"]
+    Parameters
+    ----------
+    Exception : _type_
+        Base exception
+    """
+
+    def __str__(self) -> str:
+        """Print Exception.
+
+        Returns
+        -------
+        str
+            String info message
+        """
+        return "Unknown data type."

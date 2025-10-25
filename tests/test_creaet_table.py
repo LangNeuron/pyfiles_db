@@ -12,8 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Init library."""
 
-from .files_db import FilesDB
+"""test create table."""
 
-__all__ = ["FilesDB"]
+from src.pyfiles_db import FilesDB
+
+
+def test_create_table() -> None:
+    """Test for create table."""
+    file_db = FilesDB()
+    db = file_db.init()
+    db.create_table(table_name="test_craete_table", columns={"id": "INT",
+                                                     "first_name": "TEXT",
+                                                     "last_name": "TEXT",
+                                                     "number": "INT"},
+                         id_generator="id")
