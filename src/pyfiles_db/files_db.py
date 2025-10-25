@@ -43,6 +43,7 @@ class META:
     COLUMNS: str = "COLUMNS"
     TABLE_PREFIX: str = "TABLE_PREFIX"
     GENERATOR: str = "GENERATOR"
+    FILE_IDS: str = "FILE_IDS"
 
 
 class FilesDB:
@@ -263,6 +264,23 @@ class _DB(ABC):
             information when need save
         """
 
+    @abstractmethod
+    def find(self, table_name: str, condition: str) -> dict[str, Any]:
+        """Find information in database.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table
+        condition : str
+            maybe  is "id == 1"
+
+        Returns
+        -------
+        dict[str, Any]
+            all data in table
+        """
+
 
 class _DBsync(_DB):
     def __init__(self, storage: str | Path, meta_file: str) -> None:
@@ -308,7 +326,9 @@ class _DBsync(_DB):
             raise TableAlredyAvaibleError
         self._mkdir_for_table(table)
         self._meta[META.TABLES].append(table)
-        self._meta[table] = {META.COLUMNS: columns, META.GENERATOR: id_generator}
+        self._meta[table] = {
+            META.COLUMNS: columns,
+            META.GENERATOR: id_generator}
         self._update_meta()
 
     def _update_meta(self) -> None:
@@ -325,6 +345,8 @@ class _DBsync(_DB):
             name of table folder
         """
         (self._storage / table).mkdir(parents=False, exist_ok=True)
+        with Path.open(self._storage / table / ".json", mode="w") as f:
+            json.dump({META.FILE_IDS: []}, f)
 
     def new_data(self, table_name: str, data: dict[str, Any]) -> None:
         """Save new data to table.
@@ -350,13 +372,57 @@ class _DBsync(_DB):
             file_name = data[self._meta[table_name][META.GENERATOR]]
         with Path.open(self._storage / table_name / f"{file_name}.json", mode="w") as f:
             json.dump(data, f)
+        with Path.open(self._storage / table_name / ".json", mode="r") as f:
+            data = json.load(f)
+            data[META.FILE_IDS].append(file_name)
+        with Path.open(self._storage / table_name / ".json", mode="w") as f:
+            json.dump(data, f)
 
     def _check_table(self, table: str) -> bool:
         return table in self._meta[META.TABLES]
 
-    def _check_data(self, columns: dict[str, str], data: dict[str, Any]) -> bool:
+    def _check_data(self, columns: dict[str, str],
+                    data: dict[str, Any]) -> bool:
         # TODO: add check data
         return True
+
+    def find(self, table_name: str, condition: str) -> dict[str, Any]:
+        table_name = self._meta[META.TABLE_PREFIX] + table_name
+        if not self._check_table(table_name):
+            raise ValueError(f"Table {table_name} not found")
+        column_name, value = condition.replace(" ", "").split("==")
+        if not self._check_column_in_table(table_name, column_name):
+            raise ValueError(f"Column {column_name} not found in table {table_name}")
+        value = self._change_type(value,
+                                  self._meta[table_name][META.COLUMNS][column_name])
+        if self._meta[table_name][META.GENERATOR] == column_name:
+            with Path.open(self._storage / table_name / f"{value}.json", mode="r") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    return data
+                return {}
+        with Path.open(self._storage / table_name / ".json", mode="r") as f:
+            data = json.load(f)
+            names = data[META.FILE_IDS]
+        for name in names:
+            with Path.open(self._storage / table_name / f"{name}.json", mode="r") as f:
+                data = json.load(f)
+                if data[column_name] == value and isinstance(data, dict):
+                    return data
+        return {column_name: value}
+
+    def _check_column_in_table(self, table_name: str, column_name: str) -> bool:
+        return column_name in self._meta[table_name][META.COLUMNS]
+
+    def _change_type(self, value: str, column_type: str) -> Any:
+        match column_type:
+            case "INT":
+                return int(value)
+            case "TEXT":
+                return str(value)
+            case _:
+                raise ValueError(f"Unknown column type: {column_type}")
+
 
 class _DBasync(_DB):
     def __init__(self, storage: str | Path, meta_file: str) -> None:
