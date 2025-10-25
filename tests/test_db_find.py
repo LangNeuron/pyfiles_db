@@ -31,6 +31,9 @@ def test_find() -> None:
                                             "number": "INT"}, id_generator="id")
     bd.new_data(db_name, d1)
     bd.new_data(db_name, d2)
-    assert bd.find(db_name, "number == 8") == d1
-    assert bd.find(db_name, "id==1") == d1
-    assert bd.find(db_name, "last_name == Wandack") == d2
+    if not (bd.find(db_name, "number == 8") == d1):
+        raise ValueError
+    if not (bd.find(db_name, "id==1") == d1):
+        raise ValueError
+    if not (bd.find(db_name, "last_name == Wandack") == d2):
+        raise ValueError

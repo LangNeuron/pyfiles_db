@@ -26,9 +26,19 @@ import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
-from .errors import PathNotAvaibleError, TableAlredyAvaibleError
+from .errors import (
+    DataIsUncorrectError,
+    NotFoundColumnError,
+    NotFoundTableError,
+    PathNotAvaibleError,
+    TableAlredyAvaibleError,
+    UnknownDataTypeError,
+)
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 BASE_PATH_STORAGE = Path(__file__).parent.parent.parent / "database"
 
@@ -281,7 +291,12 @@ class _DB(ABC):
             all data in table
         """
 
-
+def infinite_natural_numbers() -> Generator[Any, Any, Any]:
+    """Generate numbers."""
+    number = 1
+    while True:
+        yield number
+        number += 1
 class _DBsync(_DB):
     def __init__(self, storage: str | Path, meta_file: str) -> None:
         """Init databs.
@@ -296,6 +311,7 @@ class _DBsync(_DB):
         self._storage = Path(storage)
         self._meta_file = meta_file
         self._load_meta()
+        self._name_generator = infinite_natural_numbers()
 
     def _load_meta(self) -> None:
         """Load meta information from file."""
@@ -360,17 +376,19 @@ class _DBsync(_DB):
         """
         table_name = self._meta[META.TABLE_PREFIX] + table_name
         if not self._check_table(table_name):
-            raise ValueError(f"Table {table_name} not found")
+            raise NotFoundTableError(table_name=table_name)
         if not self._check_data(self._meta[table_name][META.COLUMNS], data):
-            raise ValueError(f"Data {data} not correct")
+            raise DataIsUncorrectError(data=data)
         file_name = ""
         if (self._meta[table_name][META.GENERATOR] is None or
          isinstance(self._meta[table_name][META.GENERATOR], int)):
-            # TODO: add generator name
-            raise NotImplementedError
+            # TODO: add more safity generator name  # noqa: FIX002, TD002, TD003
+            file_name = next(self._name_generator)
         else:
             file_name = data[self._meta[table_name][META.GENERATOR]]
-        with Path.open(self._storage / table_name / f"{file_name}.json", mode="w") as f:
+        with Path.open(
+                self._storage / table_name / f"{file_name}.json",
+                mode="w") as f:
             json.dump(data, f)
         with Path.open(self._storage / table_name / ".json", mode="r") as f:
             data = json.load(f)
@@ -409,7 +427,9 @@ class _DBsync(_DB):
         bool
             Data is correct
         """
-        # TODO: add check data
+        for key, val in data.items():
+            if (self._change_type(val, columns[key]) != val):
+                return False
         return True
 
     def find(self, table_name: str, condition: str) -> dict[str, Any]:
@@ -436,23 +456,29 @@ class _DBsync(_DB):
         """
         table_name = self._meta[META.TABLE_PREFIX] + table_name
         if not self._check_table(table_name):
-            raise ValueError(f"Table {table_name} not found")
+            raise NotFoundTableError(table_name=table_name)
         column_name, value = condition.replace(" ", "").split("==")
         if not self._check_column_in_table(table_name, column_name):
-            raise ValueError(f"Column {column_name} not found in table {table_name}")
+            raise NotFoundColumnError(column_name=column_name,
+                                      table_name=table_name)
         value = self._change_type(value,
                                   self._meta[table_name][META.COLUMNS][column_name])
         if self._meta[table_name][META.GENERATOR] == column_name:
-            with Path.open(self._storage / table_name / f"{value}.json", mode="r") as f:
+            with Path.open(
+                    self._storage / table_name / f"{value}.json",
+                    mode="r") as f:
                 data = json.load(f)
                 if isinstance(data, dict):
                     return data
                 return {}
-        with Path.open(self._storage / table_name / ".json", mode="r") as f:
+        with Path.open(
+            self._storage / table_name / ".json",mode="r") as f:
             data = json.load(f)
             names = data[META.FILE_IDS]
         for name in names:
-            with Path.open(self._storage / table_name / f"{name}.json", mode="r") as f:
+            with Path.open(
+                    self._storage / table_name / f"{name}.json",
+                    mode="r") as f:
                 data = json.load(f)
                 if data[column_name] == value and isinstance(data, dict):
                     return data
@@ -475,7 +501,7 @@ class _DBsync(_DB):
         """
         return column_name in self._meta[table_name][META.COLUMNS]
 
-    def _change_type(self, value: str, column_type: str) -> Any:
+    def _change_type(self, value: str, column_type: str) -> Any:  # noqa: ANN401
         """Change data type.
 
         Parameters
@@ -501,8 +527,7 @@ class _DBsync(_DB):
             case "TEXT":
                 return str(value)
             case _:
-                raise ValueError(f"Unknown column type: {column_type}")
-
+                raise UnknownDataTypeError
 
 class _DBasync(_DB):
     def __init__(self, storage: str | Path, meta_file: str) -> None:
@@ -529,3 +554,31 @@ class _DBasync(_DB):
         columns : dict[str, Any]
             columns with data type
         """
+
+    def new_data(self, table: str, data: dict[str, Any]) -> None:
+        """Add new data to database.
+
+        Parameters
+        ----------
+        table : str
+            name of data table
+        data : dict[str, Any]
+            information when need save
+        """
+
+    def find(self, table_name: str, condition: str) -> dict[str, Any]:
+        """Find information in database.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table
+        condition : str
+            maybe  is "id == 1"
+
+        Returns
+        -------
+        dict[str, Any]
+            all data in table
+        """
+        return {table_name: condition}
