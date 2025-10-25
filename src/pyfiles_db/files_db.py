@@ -42,6 +42,7 @@ class META:
     ENCRYPTDB: str = "ENCRYPTDB"
     COLUMNS: str = "COLUMNS"
     TABLE_PREFIX: str = "TABLE_PREFIX"
+    GENERATOR: str = "GENERATOR"
 
 
 class FilesDB:
@@ -234,7 +235,8 @@ class _DB(ABC):
         """
 
     @abstractmethod
-    def create_table(self, table_name: str, columns: dict[str, str]) -> None:
+    def create_table(self, table_name: str, columns: dict[str, str],
+                     id_generator: str | None = None) -> None:
         """Craete a new table.
 
         Parameters
@@ -243,6 +245,22 @@ class _DB(ABC):
             name of table
         columns : dict[str, str]
             columns with data type
+        id_generator : str, None
+            default None
+            str is name of column data when need use how nameing of file
+            None use simple id generator (increment, not recominded)
+        """
+
+    @abstractmethod
+    def new_data(self, table: str, data: dict[str, Any]) -> None:
+        """Add new data to database.
+
+        Parameters
+        ----------
+        table : str
+            name of data table
+        data : dict[str, Any]
+            information when need save
         """
 
 
@@ -266,7 +284,8 @@ class _DBsync(_DB):
         with Path.open(self._storage / self._meta_file, "r") as f:
             self._meta = json.load(f)
 
-    def create_table(self, table_name: str, columns: dict[str, str]) -> None:
+    def create_table(self, table_name: str, columns: dict[str, str],
+                     id_generator: str | None = None) -> None:
         """Create table.
 
         Parameters
@@ -275,19 +294,21 @@ class _DBsync(_DB):
             name of table
         columns : dict[str, str]
             columns with data type
+        id_generator : str | None
+           generator for name of file. Default None
 
         Raises
         ------
         TableAlredyAvaibleError
             if table alredy avaible
         """
-        # TODO: Table. columns is maybe {"USER_ID": "INT", "NAME": "TEXT"}
+        # Table. columns is maybe {"USER_ID": "INT", "NAME": "TEXT"}
         table = self._meta[META.TABLE_PREFIX] + table_name
         if table in self._meta[META.TABLES]:
             raise TableAlredyAvaibleError
         self._mkdir_for_table(table)
-        self._meta[META.TABLES].append(table_name)
-        self._meta[table] = {META.COLUMNS: columns}
+        self._meta[META.TABLES].append(table)
+        self._meta[table] = {META.COLUMNS: columns, META.GENERATOR: id_generator}
         self._update_meta()
 
     def _update_meta(self) -> None:
@@ -305,6 +326,38 @@ class _DBsync(_DB):
         """
         (self._storage / table).mkdir(parents=False, exist_ok=True)
 
+    def new_data(self, table_name: str, data: dict[str, Any]) -> None:
+        """Save new data to table.
+
+        Parameters
+        ----------
+        table_name : str
+            name of need table
+        data : dict[str, Any]
+            information when need save
+        """
+        table_name = self._meta[META.TABLE_PREFIX] + table_name
+        if not self._check_table(table_name):
+            raise ValueError(f"Table {table_name} not found")
+        if not self._check_data(self._meta[table_name][META.COLUMNS], data):
+            raise ValueError(f"Data {data} not correct")
+        file_name = ""
+        if (self._meta[table_name][META.GENERATOR] is None or
+         isinstance(self._meta[table_name][META.GENERATOR], int)):
+            # TODO: add generator name
+            raise NotImplementedError
+        else:
+            file_name = data[self._meta[table_name][META.GENERATOR]]
+        with Path.open(self._storage / table_name / f"{file_name}.json", mode="w") as f:
+            json.dump(data, f)
+
+    def _check_table(self, table: str) -> bool:
+        return table in self._meta[META.TABLES]
+
+    def _check_data(self, columns: dict[str, str], data: dict[str, Any]) -> bool:
+        # TODO: add check data
+        return True
+
 class _DBasync(_DB):
     def __init__(self, storage: str | Path, meta_file: str) -> None:
         """Init databs.
@@ -319,7 +372,8 @@ class _DBasync(_DB):
         self._storage = storage
         self._meta_file = meta_file
 
-    def create_table(self, table_name: str, columns: dict[str, Any]) -> None:
+    def create_table(self, table_name: str, columns: dict[str, Any],
+                     id_generator: str | None = None) -> None:
         """Create table.
 
         Parameters
