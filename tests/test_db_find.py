@@ -22,6 +22,7 @@ d2 = {"id": 2, "first_name": "Alex", "last_name": "Wandack", "number": 101}
 db_name = "test_finder"
 
 def test_find() -> None:
+    """Test for find module."""
     f = FilesDB()
     bd = f.init()
     bd.create_table(db_name, columns={"id": "INT",

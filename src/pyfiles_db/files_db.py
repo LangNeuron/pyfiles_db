@@ -379,14 +379,61 @@ class _DBsync(_DB):
             json.dump(data, f)
 
     def _check_table(self, table: str) -> bool:
+        """Check table for exists.
+
+        Parameters
+        ----------
+        table : str
+            name of table
+
+        Returns
+        -------
+        bool
+            exist table
+        """
         return table in self._meta[META.TABLES]
 
     def _check_data(self, columns: dict[str, str],
                     data: dict[str, Any]) -> bool:
+        """Check type data.
+
+        Parameters
+        ----------
+        columns : dict[str, str]
+            col of table
+        data : dict[str, Any]
+            new information
+
+        Returns
+        -------
+        bool
+            Data is correct
+        """
         # TODO: add check data
         return True
 
     def find(self, table_name: str, condition: str) -> dict[str, Any]:
+        """Find information in table.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table
+        condition : str
+            condition, maybe "id == 5"
+
+        Returns
+        -------
+        dict[str, Any]
+            all data when find condition
+
+        Raises
+        ------
+        ValueError
+            Table not found error
+        ValueError
+            Column not found error
+        """
         table_name = self._meta[META.TABLE_PREFIX] + table_name
         if not self._check_table(table_name):
             raise ValueError(f"Table {table_name} not found")
@@ -412,9 +459,42 @@ class _DBsync(_DB):
         return {column_name: value}
 
     def _check_column_in_table(self, table_name: str, column_name: str) -> bool:
+        """Chech column in table on exist.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table
+        column_name : str
+            name of column
+
+        Returns
+        -------
+        bool
+            esist column
+        """
         return column_name in self._meta[table_name][META.COLUMNS]
 
     def _change_type(self, value: str, column_type: str) -> Any:
+        """Change data type.
+
+        Parameters
+        ----------
+        value : str
+            value
+        column_type : str
+            data type
+
+        Returns
+        -------
+        Any
+            correct data type
+
+        Raises
+        ------
+        ValueError
+            if column_type is unknown
+        """
         match column_type:
             case "INT":
                 return int(value)

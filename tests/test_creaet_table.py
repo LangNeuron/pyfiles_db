@@ -19,6 +19,7 @@ from src.pyfiles_db import FilesDB
 
 
 def test_create_table() -> None:
+    """Test for create table."""
     file_db = FilesDB()
     db = file_db.init()
     db.create_table(table_name="test_craete_table", columns={"id": "INT",
