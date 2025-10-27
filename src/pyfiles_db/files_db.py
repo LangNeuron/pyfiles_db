@@ -43,6 +43,12 @@ if TYPE_CHECKING:
 BASE_PATH_STORAGE = Path(__file__).parent.parent.parent / "database"
 
 
+def infinite_natural_numbers(start: int) -> Generator[Any, Any, Any]:
+    """Generate numbers."""
+    number = start
+    while True:
+        yield number
+        number += 1
 
 @dataclass
 class META:
@@ -79,7 +85,7 @@ class FilesDB:
              *,
              asyncbd: bool = False,
              meta_file: str = "meta.json",
-             **meta: dict[str, Any],
+             meta: dict[str, Any] | None = None,
             ) -> _DB:
         """Initinalize a new database.
 
@@ -100,6 +106,8 @@ class FilesDB:
         _DB
             base database structure
         """
+        if meta is None:
+            meta = {}
         self._meta_file = meta_file
         if storage is None:
             storage = BASE_PATH_STORAGE
@@ -263,12 +271,12 @@ class _DB(ABC):
         """
 
     @abstractmethod
-    def new_data(self, table: str, data: dict[str, Any]) -> None:
+    def new_data(self, table_name: str, data: dict[str, Any]) -> None:
         """Add new data to database.
 
         Parameters
         ----------
-        table : str
+        tabel : str
             name of data table
         data : dict[str, Any]
             information when need save
@@ -291,12 +299,6 @@ class _DB(ABC):
             all data in table
         """
 
-def infinite_natural_numbers() -> Generator[Any, Any, Any]:
-    """Generate numbers."""
-    number = 1
-    while True:
-        yield number
-        number += 1
 class _DBsync(_DB):
     def __init__(self, storage: str | Path, meta_file: str) -> None:
         """Init databs.
@@ -311,7 +313,7 @@ class _DBsync(_DB):
         self._storage = Path(storage)
         self._meta_file = meta_file
         self._load_meta()
-        self._name_generator = infinite_natural_numbers()
+        self._id_generators: dict[str, Generator[Any, Any, Any]] = {}
 
     def _load_meta(self) -> None:
         """Load meta information from file."""
@@ -319,7 +321,7 @@ class _DBsync(_DB):
             self._meta = json.load(f)
 
     def create_table(self, table_name: str, columns: dict[str, str],
-                     id_generator: str | None = None) -> None:
+                     id_generator: str | int | None = None) -> None:
         """Create table.
 
         Parameters
@@ -340,6 +342,9 @@ class _DBsync(_DB):
         table = self._meta[META.TABLE_PREFIX] + table_name
         if table in self._meta[META.TABLES]:
             raise TableAlredyAvaibleError
+        if id_generator is None:
+            id_generator = 0
+            self._id_generators[table] = infinite_natural_numbers(id_generator)
         self._mkdir_for_table(table)
         self._meta[META.TABLES].append(table)
         self._meta[table] = {
@@ -382,8 +387,12 @@ class _DBsync(_DB):
         file_name = ""
         if (self._meta[table_name][META.GENERATOR] is None or
          isinstance(self._meta[table_name][META.GENERATOR], int)):
-            # TODO: add more safity generator name  # noqa: FIX002, TD002, TD003
-            file_name = next(self._name_generator)
+            if self._id_generators.get(table_name) is None:
+                self._id_generators[table_name] = infinite_natural_numbers(
+                    self._meta[table_name][META.GENERATOR])
+            file_name = next(self._id_generators[table_name])
+            self._meta[table_name][META.GENERATOR] += 1
+            self._update_meta()
         else:
             file_name = data[self._meta[table_name][META.GENERATOR]]
         with Path.open(
@@ -555,7 +564,7 @@ class _DBasync(_DB):
             columns with data type
         """
 
-    def new_data(self, table: str, data: dict[str, Any]) -> None:
+    def new_data(self, table_name: str, data: dict[str, Any]) -> None:
         """Add new data to database.
 
         Parameters
