@@ -12,8 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Simple test."""
 
-def test_simple() -> None:
-    """Simple test."""
-    return
+
+import shutil
+from collections.abc import Generator
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def cleanup_after_test() -> Generator[Any, Any, Any]:
+    """Deleate database after test."""
+    yield
+    path = Path() / "database"
+    shutil.rmtree(path)
