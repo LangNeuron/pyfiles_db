@@ -15,7 +15,11 @@
 
 """test create table."""
 
+import json
+from pathlib import Path
+
 from src.pyfiles_db import FilesDB
+from src.pyfiles_db.files_db import META
 
 
 def test_create_table() -> None:
@@ -27,3 +31,59 @@ def test_create_table() -> None:
                                                      "last_name": "TEXT",
                                                      "number": "INT"},
                          id_generator="id")
+
+def test_files_name_generator() -> None:
+    """Test files name genearator. id's generator."""
+    table_prefix = "TABLE_"
+    fisrt_len = 10
+    second_len = 20
+    storage_path = Path("database")
+    table_name = "test_files_name_generator"
+    test_data = {
+        "ID": 0,
+        "NAME": "JDH",
+        "NUMBER": 0,
+    }
+    file_db = FilesDB()
+    db = file_db.init(meta={META.TABLE_PREFIX: table_prefix})
+    db.create_table(table_name=table_name, columns={
+        "ID": "INT",
+        "NAME": "TEXT",
+        "NUMBER": "INT",
+    })
+
+    for i in range(fisrt_len):
+        test_data["NUMBER"] = i
+        db.new_data(table_name=table_name, data=test_data)
+
+    # check data ids.
+
+    n = check_storage(storage_path / (table_prefix + table_name), "NUMBER")
+    if n != fisrt_len:
+        raise AssertionError(n)
+
+    new_db = file_db.init()
+
+    for i in range(fisrt_len, second_len):
+        test_data["NUMBER"] = i
+        new_db.new_data(table_name=table_name, data=test_data)
+
+    # check data ids.
+
+    n = check_storage(storage_path / (table_prefix + table_name), "NUMBER")
+    if n != second_len:
+        raise AssertionError(n)
+
+def check_storage(storage: Path, key: str) -> int:
+    """Check storage file for correct data."""
+    correct_data = 0
+    for file_path in storage.glob("*.json"):
+        if file_path.name == ".json":
+            continue
+        file_name_without_ext = file_path.stem
+        with Path.open(file_path, mode="r") as f:
+            data = json.load(f)
+        value_from_json = data[key]
+        if str(file_name_without_ext) == str(value_from_json):
+            correct_data += 1
+    return correct_data
