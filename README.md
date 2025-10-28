@@ -25,7 +25,6 @@ pip install pyfiles_db
 
 ```python
 from pyfiles_db import FilesDB
-from pathlib
 
 file_db = FilesDB()
 
@@ -55,15 +54,15 @@ db.new_data(table_name="users", data={
 })
 
 user_id_1 = db.find("usesr", "id == 1")
-# return [{"id": 1, "name": "Anton", "age": 17}]
+# return [{"1": {"id": 1, "name": "Anton", "age": 17}}]
 
 user_id_2 = db.find("usesr", "id == 2") 
-# return [{"id": 2, "name": "Alex", "age": 17}]
+# return [{"2": {"id": 2, "name": "Alex", "age": 17}}]
 
 users_age_17 = db.find("users", "age == 17")
 # return [
-#     {"id": 1, "name": "Anton", "age": 17},
-#     {"id": 2, "name": "Alex", "age": 17},
+#     {"1": {"id": 1, "name": "Anton", "age": 17}},
+#     {"2": {"id": 2, "name": "Alex", "age": 17},
 # ]
 
 ```
