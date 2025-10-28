@@ -26,7 +26,7 @@ from pyfiles_db.errors import (
     DataIsUncorrectError,
     NotFoundColumnError,
     NotFoundTableError,
-    TableAlredyAvaibleError,
+    TableAlreadyAvaibleError,
     UnknownDataTypeError,
 )
 from pyfiles_db.utils import infinite_natural_numbers
@@ -37,14 +37,14 @@ if TYPE_CHECKING:
 
 class _DBasync(_AsyncDB):
     def __init__(self, storage: str | Path, meta_file: str) -> None:
-        """Init databs.
+        """Initialize the asynchronous database manager.
 
         Parameters
         ----------
         storage : str | Path
-            path to db location
+            Path to the database location.
         meta_file : str
-           name of meta file
+            Name of the meta file.
         """
         self._storage = Path(storage)
         self._meta_file = meta_file
@@ -61,26 +61,26 @@ class _DBasync(_AsyncDB):
             columns: dict[str, Any],
             id_generator: str | int | None = None,
             ) -> None:
-        """Create table.
+        """Create a table (async).
 
         Parameters
         ----------
         table_name : str
-            name of table
+            Name of the table.
         columns : dict[str, str]
-            columns with data type
+            Columns mapping to their data types.
         id_generator : str | None
-           generator for name of file. Default None
+            Generator for file names. Default None.
 
         Raises
         ------
-        TableAlredyAvaibleError
-            if table alredy avaible
+        TableAlreadyAvaibleError
+            If the table already exists.
         """
         # Table. columns is maybe {"USER_ID": "INT", "NAME": "TEXT"}
         table = self._meta[META.TABLE_PREFIX] + table_name
         if table in self._meta[META.TABLES]:
-            raise TableAlredyAvaibleError
+            raise TableAlreadyAvaibleError
         if id_generator is None:
             id_generator = 0
             self._id_generators[table] = infinite_natural_numbers(id_generator)
@@ -100,12 +100,12 @@ class _DBasync(_AsyncDB):
             await f.write(json.dumps(self._meta))
 
     async def _mkdir_for_table(self, table: str | Path) -> None:
-        """Make table foleder.
+        """Create the on-disk folder and index file for a table.
 
         Parameters
         ----------
         table : str | Path
-            name of table folder
+            Name of the table folder.
         """
         (self._storage / table).mkdir(parents=False, exist_ok=True)
         async with aiofiles.open(
@@ -116,14 +116,14 @@ class _DBasync(_AsyncDB):
 
 
     async def new_data(self, table_name: str, data: dict[str, Any]) -> None:
-        """Add new data to database.
+        """Add new data to the table (async).
 
         Parameters
         ----------
-        table : str
-            name of data table
+        table_name : str
+            Name of the table.
         data : dict[str, Any]
-            information when need save
+            The record to save.
         """
         table_name = self._meta[META.TABLE_PREFIX] + table_name
         if not self._check_table(table_name):
@@ -277,7 +277,7 @@ class _DBasync(_AsyncDB):
         return result
 
     def _check_column_in_table(self, table_name: str, column_name: str) -> bool:
-        """Chech column in table on exist.
+        """Check column in table on exist.
 
         Parameters
         ----------
@@ -289,7 +289,7 @@ class _DBasync(_AsyncDB):
         Returns
         -------
         bool
-            esist column
+            exist column
         """
         return column_name in self._meta[table_name][META.COLUMNS]
 
@@ -305,7 +305,7 @@ class _DBasync(_AsyncDB):
         Parameters
         ----------
         file_id : str
-            unical file name
+            unique file name
         new_data : dict[str, Any]
             new data when need save
         """

@@ -12,23 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Eror DbNotLoadedError."""
+"""Path / storage related errors."""
 
 class PathNotAvaibleError(FileNotFoundError):
-    """Error DbNotLoadedError.
+    """Raised when the configured database storage path is not available.
 
-    Parameters
-    ----------
-    FileNotFoundError : _type_
-        File exception
+    Note: class name preserves historical spelling for backward
+    compatibility with existing code and tests.
     """
 
     def __str__(self) -> str:
-        """Print Exception.
-
-        Returns
-        -------
-        str
-            String info message
-        """
-        return "Database File not avaible"
+        """Return a readable message for this exception."""
+        return "Database file not available"

@@ -23,7 +23,7 @@ from typing import Any
 class _DB(ABC):
     @abstractmethod
     def __init__(self, storage: str | Path, meta_file: str) -> None:
-        """Init databs.
+        """Init database.
 
         Parameters
         ----------
@@ -38,7 +38,7 @@ class _DB(ABC):
                      columns: dict[str, str],
                      id_generator: str | int | None = None,
                      ) -> None | Coroutine[Any, Any, None]:
-        """Craete a new table.
+        """Create a new table.
 
         Parameters
         ----------
@@ -94,7 +94,7 @@ class _DB(ABC):
         Parameters
         ----------
         file_id : str
-            unical file name
+            unique file name
         new_data : dict[str, Any]
             new data when need save
         """
@@ -116,14 +116,14 @@ class _DB(ABC):
 class _AsyncDB(ABC):
     @abstractmethod
     def __init__(self, storage: str | Path, meta_file: str) -> None:
-        """Init databs.
+        """Initialize the asynchronous database manager.
 
         Parameters
         ----------
         storage : str | Path
-            path to db location
+            Path to database location.
         meta_file : str
-           name of meta file
+            Name of meta file.
         """
 
     @abstractmethod
@@ -131,30 +131,29 @@ class _AsyncDB(ABC):
                      columns: dict[str, str],
                      id_generator: str | int | None = None,
                      ) -> None:
-        """Craete a new table.
+        """Create a new table (async).
 
         Parameters
         ----------
         table_name : str
-            name of table
+            Name of the table.
         columns : dict[str, str]
-            columns with data type
-        id_generator : str, None
-            default None
-            str is name of column data when need use how nameing of file
-            None use simple id generator (increment, not recominded)
+            Columns mapping to their data types.
+        id_generator : str | int | None
+            If a string, this is the column name used as file identifier.
+            If None, an integer auto-increment generator is used.
         """
 
     @abstractmethod
     async def new_data(self, table_name: str, data: dict[str, Any]) -> None:
-        """Add new data to database.
+        """Add new data to the database (async).
 
         Parameters
         ----------
-        tabel : str
-            name of data table
+        table_name : str
+            Name of the table.
         data : dict[str, Any]
-            information when need save
+            Record to save.
         """
 
     @abstractmethod
@@ -190,7 +189,7 @@ class _AsyncDB(ABC):
         Parameters
         ----------
         file_id : str
-            unical file name
+            unique file name
         new_data : dict[str, Any]
             new data when need save
         """

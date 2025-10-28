@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from pyfiles_db.database_manager import _DB, META, _DBasync, _DBsync
+from pyfiles_db.database_manager import META, _DBasync, _DBsync
 
 try:
     from typing import Self
@@ -63,23 +63,23 @@ class FilesDB:
              *,
              meta_file: str = "meta.json",
              meta: dict[str, Any] | None = None,
-            ) -> _DB:
-        """Initinalize a new database.
+            ) -> _DBsync:
+        """Initialize a new synchronous database connection.
 
-        If database is already loaded - connection
-        If database is not loaded - create new one
+        If a database is already loaded this returns a connection. If not,
+        creates the base meta information and returns a new connection.
 
         Parameters
         ----------
         storage : Path | str | None, optional
-            path to databse location, by default None
+            Path to database location, by default None
         meta_file : str, optional
-            name of meta file, by default "meta.json"
+            Name of meta file, by default "meta.json"
 
         Returns
         -------
-        _DB
-            base database structure
+        _DBsync
+            Synchronous database manager instance.
         """
         storage = self._configure_database(
             storage=storage,
@@ -93,22 +93,22 @@ class FilesDB:
              meta_file: str = "meta.json",
              meta: dict[str, Any] | None = None,
             ) -> _AsyncDB:
-        """Initinalize a new database.
+        """Initialize a new asynchronous database connection.
 
-        If database is already loaded - connection
-        If database is not loaded - create new one
+        If a database is already loaded this returns a connection. If not,
+        creates the base meta information and returns a new async manager.
 
         Parameters
         ----------
         storage : Path | str | None, optional
-            path to databse location, by default None
+            Path to database location, by default None
         meta_file : str, optional
-            name of meta file, by default "meta.json"
+            Name of meta file, by default "meta.json"
 
         Returns
         -------
-        _DB
-            base database structure
+        _AsyncDB
+            Asynchronous database manager instance.
         """
         storage = self._configure_database(
             storage=storage,
@@ -132,12 +132,12 @@ class FilesDB:
         return storage
 
     def _base_meta(self) -> dict[str, Any]:
-        """Return base meat information.
+        """Return base meta information.
 
         Returns
         -------
         dict[str, Any]
-            base meta information
+            Base meta information.
         """
         return {
             META.TABLES: [],
@@ -206,26 +206,25 @@ class FilesDB:
             json.dump(meta, f)
 
     def _check_storage(self, storage: str | Path) -> bool:
-        """Check storage for avaible.
+        """Check storage availability and create folder if needed.
 
         Parameters
         ----------
         storage : str | Path
-            path  to database location
+            Path to database location.
 
         Returns
         -------
         bool
-            database alredy exist.
-            False - if not exist.
-            True - if esist meta file.
+            True if the meta file already exists (database exists).
+            False if the meta file does not exist yet.
 
         Raises
         ------
         PathNotAvaibleError
-            Exception for if path not avaible
+            If the path is not available.
         NotADirectoryError
-            Exception when path not a dir
+            If the path exists but is not a directory.
         """
         storage = Path(storage)
         storage.mkdir(parents=True, exist_ok=True)

@@ -28,20 +28,20 @@ from pyfiles_db import FilesDB
 
 file_db = FilesDB()
 
-db = file_db.init_async()  # Or file_db.init_sync() for sync mode
+db = file_db.init_sync()  # Or file_db.init_async() for async mode
 # storage - path to database location, if is None use default path.
 
-db.craeate_table(
+db.create_table(
     "users",
     columns={
         "id": "INT",
         "name": "TEXT",
         "age": "INT",
     },
-    id_generator="id", # required unical value of table, if None use generator for auto increment.
+    id_generator="id", # required unique value of table, if None use generator for auto increment.
 )
 
-db.new_data(table_name="usesr", data={
+db.new_data(table_name="users", data={
     "id": 1,
     "name": "Anton",
     "age": 17,
@@ -53,18 +53,32 @@ db.new_data(table_name="users", data={
     "age": 17,
 })
 
-user_id_1 = db.find("usesr", "id == 1")
-# return [{"1": {"id": 1, "name": "Anton", "age": 17}}]
+user_id_1 = db.find("users", "id == 1")
+# return [{"1": {"id": 1, "name": "Anton", "age": 17}}], 1 is file_id
 
-user_id_2 = db.find("usesr", "id == 2") 
-# return [{"2": {"id": 2, "name": "Alex", "age": 17}}]
+user_id_2 = db.find("users", "id == 2") 
+# return [{"2": {"id": 2, "name": "Alex", "age": 17}}], 2 is file_id
 
 users_age_17 = db.find("users", "age == 17")
 # return [
-#     {"1": {"id": 1, "name": "Anton", "age": 17}},
-#     {"2": {"id": 2, "name": "Alex", "age": 17},
+#     {"1": {"id": 1, "name": "Anton", "age": 17}}, # 1 is file_id
+#     {"2": {"id": 2, "name": "Alex", "age": 17}, # 2 is file_id
 # ]
 
+```
+
+
+Or async version:
+```python
+from pyfiles_db import FilesDB
+import asyncio
+async def main():
+    file_db = FilesDB()
+    db = file_db.init_async("path/to/folder")
+    await db.create_table(...)
+    await db.new_data(...)
+    res = await db.find(...)
+asyncio.run(main())
 ```
 
 ## Use Cases
