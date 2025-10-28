@@ -65,7 +65,7 @@ class _DB(ABC):
         """
 
     @abstractmethod
-    def find(self, table_name: str, condition: str) -> dict[str, Any]:
+    def find(self, table_name: str, condition: str) -> list[dict[str, Any]]:
         """Find information in database.
 
         Parameters
@@ -77,7 +77,7 @@ class _DB(ABC):
 
         Returns
         -------
-        dict[str, Any]
+        list[dict[str, Any]]
             all data in table
         """
 
@@ -126,7 +126,10 @@ class _AsyncDB(ABC):
         """
 
     @abstractmethod
-    async def find(self, table_name: str, condition: str) -> dict[str, Any]:
+    async def find(self,
+                   table_name: str,
+                   condition: str,
+                   ) -> list[dict[str, Any]]:
         """Find information in database.
 
         Parameters
@@ -138,6 +141,6 @@ class _AsyncDB(ABC):
 
         Returns
         -------
-        dict[str, Any]
+        list[dict[str, Any]]
             all data in table
         """

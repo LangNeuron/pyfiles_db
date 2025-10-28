@@ -24,6 +24,7 @@ from pyfiles_db.database_manager._db import _AsyncDB
 from pyfiles_db.database_manager.meta import META
 from pyfiles_db.errors import (
     DataIsUncorrectError,
+    NotFoundColumnError,
     NotFoundTableError,
     TableAlredyAvaibleError,
     UnknownDataTypeError,
@@ -218,20 +219,76 @@ class _DBasync(_AsyncDB):
                 raise UnknownDataTypeError
 
 
-    async def find(self, table_name: str, condition: str) -> dict[str, Any]:
-        """Find information in database.
+    async def find(self,
+                   table_name: str,
+                   condition: str,
+                   ) -> list[dict[str, Any]]:
+        """Find information in table.
 
         Parameters
         ----------
         table_name : str
             name of table
         condition : str
-            maybe  is "id == 1"
+            condition, maybe "id == 5"
 
         Returns
         -------
         dict[str, Any]
-            all data in table
-        """
-        return {table_name: condition}
+            all data when find condition
 
+        Raises
+        ------
+        ValueError
+            Table not found error
+        ValueError
+            Column not found error
+        """
+        table_name = self._meta[META.TABLE_PREFIX] + table_name
+        if not self._check_table(table_name):
+            raise NotFoundTableError(table_name=table_name)
+        column_name, value = condition.replace(" ", "").split("==")
+        if not self._check_column_in_table(table_name, column_name):
+            raise NotFoundColumnError(column_name=column_name,
+                                      table_name=table_name)
+        value = self._change_type(value,
+                                  self._meta[table_name][META.COLUMNS][column_name])
+        if self._meta[table_name][META.GENERATOR] == column_name:
+            async with aiofiles.open(
+                    self._storage / table_name / f"{value}.json") as f:
+                content = await f.read()
+                data = json.loads(content)
+                if isinstance(data, dict):
+                    return [data]
+                return []
+        async with aiofiles.open(
+            self._storage / table_name / ".json") as f:
+            content = await f.read()
+            data = json.loads(content)
+            names = data[META.FILE_IDS]
+        result: list[dict[str, Any]] = []
+        for name in names:
+            async with aiofiles.open(
+                    self._storage / table_name / f"{name}.json") as f:
+                content = await f.read()
+                d = json.loads(content)
+                if d[column_name] == value and isinstance(d, dict):
+                    result.append(d)
+        return result
+
+    def _check_column_in_table(self, table_name: str, column_name: str) -> bool:
+        """Chech column in table on exist.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table
+        column_name : str
+            name of column
+
+        Returns
+        -------
+        bool
+            esist column
+        """
+        return column_name in self._meta[table_name][META.COLUMNS]

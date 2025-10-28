@@ -175,7 +175,10 @@ class _DBsync(_DB):
                 return False
         return True
 
-    def find(self, table_name: str, condition: str) -> dict[str, Any]:
+    def find(self,
+             table_name: str,
+             condition: str,
+             ) -> list[dict[str, Any]]:
         """Find information in table.
 
         Parameters
@@ -187,7 +190,7 @@ class _DBsync(_DB):
 
         Returns
         -------
-        dict[str, Any]
+        list[dict[str, Any]]
             all data when find condition
 
         Raises
@@ -212,20 +215,21 @@ class _DBsync(_DB):
                     mode="r") as f:
                 data = json.load(f)
                 if isinstance(data, dict):
-                    return data
-                return {}
+                    return [data]
+                return []
         with Path.open(
             self._storage / table_name / ".json",mode="r") as f:
             data = json.load(f)
             names = data[META.FILE_IDS]
+        result: list[dict[str, Any]] = []
         for name in names:
             with Path.open(
                     self._storage / table_name / f"{name}.json",
                     mode="r") as f:
-                data = json.load(f)
-                if data[column_name] == value and isinstance(data, dict):
-                    return data
-        return {column_name: value}
+                d = json.load(f)
+                if d[column_name] == value and isinstance(d, dict):
+                    result.append(d)
+        return result
 
     def _check_column_in_table(self, table_name: str, column_name: str) -> bool:
         """Chech column in table on exist.
