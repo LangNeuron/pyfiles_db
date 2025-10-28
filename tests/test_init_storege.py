@@ -18,12 +18,13 @@
 
 from src.pyfiles_db import FilesDB
 
-# Errors message
-SINGLTON_ERROR_MSG = """Singlton Error"""
 
-
-def test_init_storage() -> None:
+def test_init_sync_storage() -> None:
     """Test for initialize simple FilesDB configuration."""
     file_db = FilesDB()
-    file_db.init()
+    file_db.init_sync()
 
+def test_init_async_storage() -> None:
+    """Test for initialize simple FilesDB configuration."""
+    file_db = FilesDB()
+    file_db.init_async()

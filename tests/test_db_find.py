@@ -24,7 +24,7 @@ db_name = "test_finder"
 def test_find() -> None:
     """Test for find module."""
     f = FilesDB()
-    bd = f.init()
+    bd = f.init_sync()
     bd.create_table(db_name, columns={"id": "INT",
                                             "first_name": "TEXT",
                                             "last_name": "TEXT",
