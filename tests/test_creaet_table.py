@@ -22,15 +22,32 @@ from src.pyfiles_db import FilesDB
 from src.pyfiles_db.files_db import META
 
 
-def test_create_table() -> None:
-    """Test for create table."""
+def test_sync_create_table() -> None:
+    """Test for async database create table."""
+    table_prefix = "TABLE_TEST_PREFIX_"
+    table_name = "test_craete_table_async_database"
+    storage_path = Path("database")
+    meta_file = "metf.json"
     file_db = FilesDB()
-    db = file_db.init()
-    db.create_table(table_name="test_craete_table", columns={"id": "INT",
+    db = file_db.init(asyncbd=False, meta={META.TABLE_PREFIX: table_prefix},
+                      meta_file=meta_file)
+    db.create_table(table_name=table_name, columns={"id": "INT",
                                                      "first_name": "TEXT",
                                                      "last_name": "TEXT",
                                                      "number": "INT"},
                          id_generator="id")
+
+    with Path.open(f"{storage_path / meta_file}") as f:
+        data = json.load(f)
+
+    if data[META.TABLE_PREFIX] != table_prefix:
+        raise ValueError
+
+    with Path.open(
+        f"{storage_path / (table_prefix + table_name) / '.json'}",
+                   ) as f:
+        data = json.load(f)
+
 
 def test_files_name_generator() -> None:
     """Test files name genearator. id's generator."""
@@ -87,3 +104,29 @@ def check_storage(storage: Path, key: str) -> int:
         if str(file_name_without_ext) == str(value_from_json):
             correct_data += 1
     return correct_data
+
+def test_async_create_table() -> None:
+    """Test for async database create table."""
+    table_prefix = "TABLE_TEST_PREFIX_"
+    table_name = "test_craete_table_async_database"
+    storage_path = Path("database")
+    meta_file = "metf.json"
+    file_db = FilesDB()
+    db = file_db.init(asyncbd=True, meta={META.TABLE_PREFIX: table_prefix},
+                      meta_file=meta_file)
+    db.create_table(table_name=table_name, columns={"id": "INT",
+                                                     "first_name": "TEXT",
+                                                     "last_name": "TEXT",
+                                                     "number": "INT"},
+                         id_generator="id")
+
+    with Path.open(f"{storage_path / file_db.meta_file}") as f:
+        data = json.load(f)
+
+    if data[META.TABLE_PREFIX] != table_prefix:
+        raise ValueError
+
+    with Path.open(
+        f"{storage_path / (table_prefix + table_name) / '.json'}",
+                   ) as f:
+        data = json.load(f)

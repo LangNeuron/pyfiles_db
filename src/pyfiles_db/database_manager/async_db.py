@@ -46,6 +46,7 @@ class _DBasync(_DB):
             columns with data type
         """
 
+
     def new_data(self, table_name: str, data: dict[str, Any]) -> None:
         """Add new data to database.
 

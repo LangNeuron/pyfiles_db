@@ -17,6 +17,6 @@
 from ._db import _DB
 from .async_db import _DBasync
 from .meta import META
-from .sync_bd import _DBsync
+from .sync_db import _DBsync
 
 __all__ = ["META", "_DB", "_DBasync", "_DBsync"]

@@ -180,7 +180,7 @@ class FilesDB:
         """
         meta = self._configure_meta(meta)
         storage = Path(storage)
-        with Path.open(storage / "meta.json", "w") as f:
+        with Path.open(storage / self._meta_file, "w") as f:
             json.dump(meta, f)
 
     def _check_storage(self, storage: str | Path) -> bool:
