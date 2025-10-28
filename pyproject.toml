@@ -1,6 +1,6 @@
 [project]
 name = "python-files-db"
-version = "0.0.1-alpha.4"
+version = "0.0.1-alpha.5"
 description = "Lightweight file-system database for Python projects."
 authors = [
     {name = "Anton Golubchikov",email = "anton1programmist@gmail.com"}
