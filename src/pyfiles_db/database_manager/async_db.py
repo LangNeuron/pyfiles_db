@@ -314,3 +314,21 @@ class _DBasync(_AsyncDB):
             self._storage / table_name / f"{file_id}.json",
             mode="w") as f:
             await f.write(json.dumps(new_data))
+
+    async def deleate(self,
+                table_name: str,
+                file_id: str,
+                ) -> None:
+        """Deleate data with file_id.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table db
+        file_id : str
+            name of file in table
+        """
+        table_name = self._meta[META.TABLE_PREFIX] + table_name
+        if not (self._storage / table_name / f"{file_id}.json").exists():
+            raise FileNotFoundError
+        (self._storage / table_name / f"{file_id}.json").unlink()

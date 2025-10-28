@@ -298,3 +298,21 @@ class _DBsync(_DB):
             self._storage / table_name / f"{file_id}.json",
             mode="w") as f:
             json.dump(new_data, f)
+
+    def deleate(self,
+                table_name: str,
+                file_id: str,
+                ) -> None:
+        """Deleate data with file_id.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table db
+        file_id : str
+            name of file in table
+        """
+        table_name = self._meta[META.TABLE_PREFIX] + table_name
+        if not (self._storage / table_name / f"{file_id}.json").exists():
+            raise FileNotFoundError
+        (self._storage / table_name / f"{file_id}.json").unlink()
