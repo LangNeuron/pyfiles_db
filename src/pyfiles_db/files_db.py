@@ -26,11 +26,14 @@ except ImportError:
 
 import json
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from .errors import (
     PathNotAvaibleError,
 )
+
+if TYPE_CHECKING:
+    from pyfiles_db.database_manager._db import _AsyncDB
 
 BASE_PATH_STORAGE = Path(__file__).parent.parent.parent / "database"
 
@@ -55,10 +58,9 @@ class FilesDB:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def init(self,
+    def init_sync(self,
              storage: Path | str | None = None,
              *,
-             asyncbd: bool = False,
              meta_file: str = "meta.json",
              meta: dict[str, Any] | None = None,
             ) -> _DB:
@@ -71,8 +73,6 @@ class FilesDB:
         ----------
         storage : Path | str | None, optional
             path to databse location, by default None
-        asyncbd : bool, optional
-            use async io database, by default False
         meta_file : str, optional
             name of meta file, by default "meta.json"
 
@@ -81,6 +81,47 @@ class FilesDB:
         _DB
             base database structure
         """
+        storage = self._configure_database(
+            storage=storage,
+            meta_file=meta_file,
+            meta=meta)
+        return _DBsync(storage=storage, meta_file=self._meta_file)
+
+    def init_async(self,
+             storage: Path | str | None = None,
+             *,
+             meta_file: str = "meta.json",
+             meta: dict[str, Any] | None = None,
+            ) -> _AsyncDB:
+        """Initinalize a new database.
+
+        If database is already loaded - connection
+        If database is not loaded - create new one
+
+        Parameters
+        ----------
+        storage : Path | str | None, optional
+            path to databse location, by default None
+        meta_file : str, optional
+            name of meta file, by default "meta.json"
+
+        Returns
+        -------
+        _DB
+            base database structure
+        """
+        storage = self._configure_database(
+            storage=storage,
+            meta_file=meta_file,
+            meta=meta)
+        return _DBasync(storage=storage, meta_file=self._meta_file)
+
+    def _configure_database(
+                            self,
+                            storage: str | Path | None,
+                            meta_file: str,
+                            meta: dict[str, Any] | None,
+                           )-> str | Path:
         if meta is None:
             meta = {}
         self._meta_file = meta_file
@@ -88,26 +129,7 @@ class FilesDB:
             storage = BASE_PATH_STORAGE
         if self._check_storage(storage=storage):
             self._create_base_meta_information(storage, meta=meta)
-        return self._connect(storage=storage, asyncbd=asyncbd)
-
-    def _connect(self, storage: str | Path, *, asyncbd: bool = False) -> _DB:
-        """Connect to database, load meta information.
-
-        Parameters
-        ----------
-        storage : str | Path
-            path to database location
-        asyncbd : bool, optional
-            use async io database, by default False
-
-        Returns
-        -------
-        _DB
-            _DB instance of database loader
-        """
-        if asyncbd:
-            return _DBasync(storage=storage, meta_file=self._meta_file)
-        return _DBsync(storage=storage, meta_file=self._meta_file)
+        return storage
 
     def _base_meta(self) -> dict[str, Any]:
         """Return base meat information.
