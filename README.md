@@ -17,7 +17,7 @@ PRE RELISE FIRST VERSION OF PYFILES_D
 
 ## Installation  
 ```bash
-pip install pyfiles_db
+pip install python-files-db
 ```
 
 
