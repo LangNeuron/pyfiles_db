@@ -15,6 +15,7 @@ classifiers = [
   "Operating System :: OS Independent"
 ]
 dependencies = [
+    "aiofiles (>=25.1.0,<26.0.0)"
 ]
 
 license-files = ["LICENSE"]
@@ -59,10 +60,12 @@ warn_unused_configs = true
 # pytets configuration
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = ["src/"]
 [dependency-groups]
 dev = [
     "ruff (>=0.14.0,<0.15.0)",
     "mypy (>=1.18.2,<2.0.0)",
-    "pytest (>=8.4.2,<9.0.0)"
+    "pytest (>=8.4.2,<9.0.0)",
+    "types-aiofiles (>=25.1.0.20251011,<26.0.0.0)",
+    "pytest-asyncio (>=1.2.0,<2.0.0)"
 ]

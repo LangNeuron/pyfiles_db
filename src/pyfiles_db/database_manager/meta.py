@@ -12,19 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Sync database manager."""
 
-"""Test for initialaize Class."""
-
-
-from src.pyfiles_db import FilesDB
+from dataclasses import dataclass
 
 
-def test_init_sync_storage() -> None:
-    """Test for initialize simple FilesDB configuration."""
-    file_db = FilesDB()
-    file_db.init_sync()
+@dataclass
+class META:
+    """Meta data for the database."""
 
-def test_init_async_storage() -> None:
-    """Test for initialize simple FilesDB configuration."""
-    file_db = FilesDB()
-    file_db.init_async()
+    TABLES: str = "TABLES"
+    ENCRYPTDB: str = "ENCRYPTDB"
+    COLUMNS: str = "COLUMNS"
+    TABLE_PREFIX: str = "TABLE_PREFIX"
+    GENERATOR: str = "GENERATOR"
+    FILE_IDS: str = "FILE_IDS"

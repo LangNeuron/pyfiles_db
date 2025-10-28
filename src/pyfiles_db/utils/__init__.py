@@ -12,19 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Utils."""
 
-"""Test for initialaize Class."""
+from .infinity_number_generator import infinite_natural_numbers
 
-
-from src.pyfiles_db import FilesDB
-
-
-def test_init_sync_storage() -> None:
-    """Test for initialize simple FilesDB configuration."""
-    file_db = FilesDB()
-    file_db.init_sync()
-
-def test_init_async_storage() -> None:
-    """Test for initialize simple FilesDB configuration."""
-    file_db = FilesDB()
-    file_db.init_async()
+__all__ = ["infinite_natural_numbers"]

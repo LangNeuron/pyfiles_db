@@ -12,19 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Init database managers."""
 
-"""Test for initialaize Class."""
+from ._db import _DB
+from .async_db import _DBasync
+from .meta import META
+from .sync_db import _DBsync
 
-
-from src.pyfiles_db import FilesDB
-
-
-def test_init_sync_storage() -> None:
-    """Test for initialize simple FilesDB configuration."""
-    file_db = FilesDB()
-    file_db.init_sync()
-
-def test_init_async_storage() -> None:
-    """Test for initialize simple FilesDB configuration."""
-    file_db = FilesDB()
-    file_db.init_async()
+__all__ = ["META", "_DB", "_DBasync", "_DBsync"]

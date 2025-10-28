@@ -12,19 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Infinity number generator."""
 
-"""Test for initialaize Class."""
+from collections.abc import Generator
+from typing import Any
 
 
-from src.pyfiles_db import FilesDB
-
-
-def test_init_sync_storage() -> None:
-    """Test for initialize simple FilesDB configuration."""
-    file_db = FilesDB()
-    file_db.init_sync()
-
-def test_init_async_storage() -> None:
-    """Test for initialize simple FilesDB configuration."""
-    file_db = FilesDB()
-    file_db.init_async()
+def infinite_natural_numbers(start: int) -> Generator[Any, Any, Any]:
+    """Generate numbers."""
+    number = start
+    while True:
+        yield number
+        number += 1
