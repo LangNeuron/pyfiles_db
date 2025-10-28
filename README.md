@@ -88,3 +88,9 @@ Ensure your code is tested (tests in /tests/) and document changes.
 
 ## License
 This project is licensed under the Apache-2.0 License. See [LICENSE](https://github.com/LangNeuron/pyfiles_db/blob/main/LICENSE) for details.
+
+## Other
+
+### [CODE_OF_CONDUCT.md](https://github.com/LangNeuron/pyfiles_db/blob/main/CODE_OF_CONDUCT.md)
+
+
