@@ -80,7 +80,7 @@ data = [
     {"id": 57, "first_name": "Daniel", "last_name": "Green", "number": 7},
     {"id": 58, "first_name": "Zoe", "last_name": "Rivera", "number": 12},
     {"id": 59, "first_name": "Nathan", "last_name": "Cooper", "number": 9},
-    {"id": 60, "first_name": "Scarlett", "last_name": "Richardson", "number": 8},
+    {"id": 60, "first_name": "Scarlett", "last_name": "Richardson", "number": 8},  # noqa: E501
     {"id": 61, "first_name": "Ryan", "last_name": "Howard", "number": 10},
     {"id": 62, "first_name": "Sofia", "last_name": "Ward", "number": 11},
     {"id": 63, "first_name": "Hunter", "last_name": "Torres", "number": 6},
