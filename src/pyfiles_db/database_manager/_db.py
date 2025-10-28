@@ -103,7 +103,7 @@ class _DB(ABC):
                 table_name: str,
                 file_id: str,
                 ) -> None:
-        """delete data with file_id.
+        """Delete data with file_id.
 
         Parameters
         ----------
@@ -200,7 +200,7 @@ class _AsyncDB(ABC):
                 table_name: str,
                 file_id: str,
                 ) -> None:
-        """delete data with file_id.
+        """Delete data with file_id.
 
         Parameters
         ----------

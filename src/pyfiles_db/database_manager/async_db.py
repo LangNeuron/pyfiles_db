@@ -319,7 +319,7 @@ class _DBasync(_AsyncDB):
                 table_name: str,
                 file_id: str,
                 ) -> None:
-        """delete data with file_id.
+        """Delete data with file_id.
 
         Parameters
         ----------
