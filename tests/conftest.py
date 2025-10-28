@@ -24,7 +24,7 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def cleanup_after_test() -> Generator[Any, Any, Any]:
-    """Deleate database after test."""
+    """Delete database after test."""
     yield
     path = Path() / "database"
     shutil.rmtree(path)

@@ -98,6 +98,20 @@ class _DB(ABC):
         new_data : dict[str, Any]
             new data when need save
         """
+    @abstractmethod
+    def delete(self,
+                table_name: str,
+                file_id: str,
+                ) -> None:
+        """Delete data with file_id.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table db
+        file_id : str
+            name of file in table
+        """
 
 class _AsyncDB(ABC):
     @abstractmethod
@@ -179,4 +193,19 @@ class _AsyncDB(ABC):
             unical file name
         new_data : dict[str, Any]
             new data when need save
+        """
+
+    @abstractmethod
+    async def delete(self,
+                table_name: str,
+                file_id: str,
+                ) -> None:
+        """Delete data with file_id.
+
+        Parameters
+        ----------
+        table_name : str
+            name of table db
+        file_id : str
+            name of file in table
         """
