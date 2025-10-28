@@ -292,3 +292,25 @@ class _DBasync(_AsyncDB):
             esist column
         """
         return column_name in self._meta[table_name][META.COLUMNS]
+
+    async def update(self,
+               table_name: str,
+               file_id: str,
+               new_data: dict[str, Any],
+               ) -> None:
+        """Update data with file_id.
+
+        Get file_id from find method.
+
+        Parameters
+        ----------
+        file_id : str
+            unical file name
+        new_data : dict[str, Any]
+            new data when need save
+        """
+        table_name = self._meta[META.TABLE_PREFIX] + table_name
+        async with aiofiles.open(
+            self._storage / table_name / f"{file_id}.json",
+            mode="w") as f:
+            await f.write(json.dumps(new_data))
