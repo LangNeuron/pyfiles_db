@@ -55,3 +55,5 @@ jobs:
 
       - name: Publish to TestPyPI (using OIDC)
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: false
