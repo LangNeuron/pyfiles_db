@@ -15,6 +15,7 @@
 """Test deleate file."""
 
 import pytest
+
 from pyfiles_db.files_db import FilesDB
 
 data = [
