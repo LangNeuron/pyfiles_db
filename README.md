@@ -91,6 +91,6 @@ This project is licensed under the Apache-2.0 License. See [LICENSE](https://git
 
 ## Other
 
-### [CODE_OF_CONDUCT.md](https://github.com/LangNeuron/pyfiles_db/blob/main/CODE_OF_CONDUCT.md)
+### [CODE_OF_CONDUCT](https://github.com/LangNeuron/pyfiles_db/blob/main/CODE_OF_CONDUCT.md)
 
-
+### [CONTRIBUTING](https://github.com/LangNeuron/pyfiles_db/blob/main/CONTRIBUTING.md)
