@@ -315,11 +315,11 @@ class _DBasync(_AsyncDB):
             mode="w") as f:
             await f.write(json.dumps(new_data))
 
-    async def deleate(self,
+    async def delete(self,
                 table_name: str,
                 file_id: str,
                 ) -> None:
-        """Deleate data with file_id.
+        """delete data with file_id.
 
         Parameters
         ----------

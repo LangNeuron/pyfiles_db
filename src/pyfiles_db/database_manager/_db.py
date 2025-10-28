@@ -99,11 +99,11 @@ class _DB(ABC):
             new data when need save
         """
     @abstractmethod
-    def deleate(self,
+    def delete(self,
                 table_name: str,
                 file_id: str,
                 ) -> None:
-        """Deleate data with file_id.
+        """delete data with file_id.
 
         Parameters
         ----------
@@ -196,11 +196,11 @@ class _AsyncDB(ABC):
         """
 
     @abstractmethod
-    async def deleate(self,
+    async def delete(self,
                 table_name: str,
                 file_id: str,
                 ) -> None:
-        """Deleate data with file_id.
+        """delete data with file_id.
 
         Parameters
         ----------

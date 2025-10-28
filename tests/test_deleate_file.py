@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Test deleate file."""
+"""Test delete file."""
 
 import pytest
 
@@ -31,9 +31,9 @@ data = [
     {"id": 10, "first_name": "Emily", "last_name": "Brown", "number": 7},
 ]
 
-def test_sync_deleate() -> None:
+def test_sync_delete() -> None:
     """Test sync update."""
-    db_name = "test_deleate_sync"
+    db_name = "test_delete_sync"
     f = FilesDB()
     db = f.init_sync()
     db.create_table(
@@ -49,7 +49,7 @@ def test_sync_deleate() -> None:
     for d in data:
         db.new_data(table_name=db_name, data=d)
 
-    db.deleate(db_name, "5")
+    db.delete(db_name, "5")
 
     try:
         db.find(db_name, "id == 5")
@@ -59,9 +59,9 @@ def test_sync_deleate() -> None:
         raise
 
 @pytest.mark.asyncio
-async def test_async_deleate() -> None:
+async def test_async_delete() -> None:
     """Test async update."""
-    db_name = "test_deleate_async"
+    db_name = "test_delete_async"
     f = FilesDB()
     db = f.init_async()
     await db.create_table(
@@ -77,7 +77,7 @@ async def test_async_deleate() -> None:
     for d in data:
         await db.new_data(table_name=db_name, data=d)
 
-    await db.deleate(db_name, "5")
+    await db.delete(db_name, "5")
 
     try:
         await db.find(db_name, "id == 5")

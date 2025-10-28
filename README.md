@@ -11,7 +11,7 @@ PRE RELISE FIRST VERSION OF PYFILES_D
 ## Features  
 - Store data directly in folders and files (no server required)
 - Simple API — quick to start
-- Supports basic CRUD operations: Create, Read, (Update, Delete - now don't realized)
+- Supports basic CRUD operations: Create, Read, Update, Delete
 - Minimal external dependencies
 - Designed for easy integration and flexibility
 

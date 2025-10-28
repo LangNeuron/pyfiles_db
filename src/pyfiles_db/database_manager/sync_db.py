@@ -299,11 +299,11 @@ class _DBsync(_DB):
             mode="w") as f:
             json.dump(new_data, f)
 
-    def deleate(self,
+    def delete(self,
                 table_name: str,
                 file_id: str,
                 ) -> None:
-        """Deleate data with file_id.
+        """delete data with file_id.
 
         Parameters
         ----------
