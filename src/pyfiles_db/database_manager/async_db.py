@@ -22,7 +22,12 @@ import aiofiles
 
 from pyfiles_db.database_manager._db import _AsyncDB
 from pyfiles_db.database_manager.meta import META
-from pyfiles_db.errors import TableAlredyAvaibleError
+from pyfiles_db.errors import (
+    DataIsUncorrectError,
+    NotFoundTableError,
+    TableAlredyAvaibleError,
+    UnknownDataTypeError,
+)
 from pyfiles_db.utils import infinite_natural_numbers
 
 if TYPE_CHECKING:
@@ -119,6 +124,99 @@ class _DBasync(_AsyncDB):
         data : dict[str, Any]
             information when need save
         """
+        table_name = self._meta[META.TABLE_PREFIX] + table_name
+        if not self._check_table(table_name):
+            raise NotFoundTableError(table_name=table_name)
+        if not self._check_data(self._meta[table_name][META.COLUMNS], data):
+            raise DataIsUncorrectError(data=data)
+        file_name = ""
+        if (self._meta[table_name][META.GENERATOR] is None or
+         isinstance(self._meta[table_name][META.GENERATOR], int)):
+            if self._id_generators.get(table_name) is None:
+                self._id_generators[table_name] = infinite_natural_numbers(
+                    self._meta[table_name][META.GENERATOR])
+            file_name = next(self._id_generators[table_name])
+            self._meta[table_name][META.GENERATOR] += 1
+            await self._update_meta()
+        else:
+            file_name = data[self._meta[table_name][META.GENERATOR]]
+        async with aiofiles.open(
+                self._storage / table_name / f"{file_name}.json",
+                mode="w") as f:
+            await f.write(json.dumps(data))
+        async with aiofiles.open(
+            self._storage / table_name / ".json") as f:
+            content = await f.read()
+            data = json.loads(content)
+            data[META.FILE_IDS].append(file_name)
+        async with aiofiles.open(
+            self._storage / table_name / ".json", mode="w") as f:
+            await f.write(json.dumps(data))
+
+    def _check_table(self, table: str) -> bool:
+        """Check table for exists.
+
+        Parameters
+        ----------
+        table : str
+            name of table
+
+        Returns
+        -------
+        bool
+            exist table
+        """
+        return table in self._meta[META.TABLES]
+
+    def _check_data(self, columns: dict[str, str],
+                    data: dict[str, Any]) -> bool:
+        """Check type data.
+
+        Parameters
+        ----------
+        columns : dict[str, str]
+            col of table
+        data : dict[str, Any]
+            new information
+
+        Returns
+        -------
+        bool
+            Data is correct
+        """
+        for key, val in data.items():
+            if (self._change_type(val, columns[key]) != val):
+                return False
+        return True
+
+    def _change_type(self, value: str, column_type: str) -> Any:  # noqa: ANN401
+        """Change data type.
+
+        Parameters
+        ----------
+        value : str
+            value
+        column_type : str
+            data type
+
+        Returns
+        -------
+        Any
+            correct data type
+
+        Raises
+        ------
+        ValueError
+            if column_type is unknown
+        """
+        match column_type:
+            case "INT":
+                return int(value)
+            case "TEXT":
+                return str(value)
+            case _:
+                raise UnknownDataTypeError
+
 
     async def find(self, table_name: str, condition: str) -> dict[str, Any]:
         """Find information in database.

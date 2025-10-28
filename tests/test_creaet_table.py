@@ -51,13 +51,13 @@ def test_sync_create_table() -> None:
         data = json.load(f)
 
 
-def test_files_name_generator() -> None:
+def test_files_sync_name_generator() -> None:
     """Test files name genearator. id's generator."""
     table_prefix = "TABLE_"
     fisrt_len = 10
     second_len = 20
     storage_path = Path("database")
-    table_name = "test_files_name_generator"
+    table_name = "test_files_sync_name_generator"
     test_data = {
         "ID": 0,
         "NAME": "JDH",
@@ -113,7 +113,7 @@ async def test_async_create_table() -> None:
     table_prefix = "TABLE_TEST_PREFIX_"
     table_name = "test_craete_table_async_database"
     storage_path = Path("database")
-    meta_file = "metf.json"
+    meta_file = "metd.json"
     file_db = FilesDB()
     db = file_db.init_async(meta={META.TABLE_PREFIX: table_prefix},
                       meta_file=meta_file)
@@ -133,3 +133,48 @@ async def test_async_create_table() -> None:
         f"{storage_path / (table_prefix + table_name) / '.json'}",
                    ) as f:
         data = json.load(f)
+
+@pytest.mark.asyncio
+async def test_files_async_name_generator() -> None:
+    """Test files name genearator. id's generator."""
+    table_prefix = "TABLE_"
+    meta_file = "meta_async.json"
+    fisrt_len = 10
+    second_len = 20
+    storage_path = Path("database")
+    table_name = "test_files_async_name_generator"
+    test_data = {
+        "ID": 0,
+        "NAME": "JDH",
+        "NUMBER": 0,
+    }
+    file_db = FilesDB()
+    db = file_db.init_async(meta={META.TABLE_PREFIX: table_prefix},
+                            meta_file=meta_file)
+    await db.create_table(table_name=table_name, columns={
+        "ID": "INT",
+        "NAME": "TEXT",
+        "NUMBER": "INT",
+    })
+
+    for i in range(fisrt_len):
+        test_data["NUMBER"] = i
+        await db.new_data(table_name=table_name, data=test_data)
+
+    # check data ids.
+
+    n = check_storage(storage_path / (table_prefix + table_name), "NUMBER")
+    if n != fisrt_len:
+        raise AssertionError(n)
+
+    new_db = file_db.init_async(meta_file=meta_file)
+
+    for i in range(fisrt_len, second_len):
+        test_data["NUMBER"] = i
+        await new_db.new_data(table_name=table_name, data=test_data)
+
+    # check data ids.
+
+    n = check_storage(storage_path / (table_prefix + table_name), "NUMBER")
+    if n != second_len:
+        raise AssertionError(n)
