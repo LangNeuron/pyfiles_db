@@ -124,9 +124,9 @@ data = [
 ]
 
 test_cases = [
-        ("number == 8", [d for d in data if d["number"] == 8]),  # noqa: PLR2004
-        ("id == 1", [d for d in data if d["id"] == 1]),
-        ("last_name == Wandack", [d for d in data if d["last_name"] == "Wandack"]),  # noqa: E501
+        ("number == 8", [{str(d["id"]):d} for d in data if d["number"] == 8]),  # noqa: PLR2004
+        ("id == 1", [{str(d["id"]):d} for d in data if d["id"] == 1]),
+        ("last_name == Wandack", [{str(d["id"]):d} for d in data if d["last_name"] == "Wandack"]),  # noqa: E501
     ]
 
 def test_find_sync() -> None:

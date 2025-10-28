@@ -234,7 +234,7 @@ class _DBasync(_AsyncDB):
 
         Returns
         -------
-        dict[str, Any]
+        list[dict[str, Any]]
             all data when find condition
 
         Raises
@@ -259,7 +259,7 @@ class _DBasync(_AsyncDB):
                 content = await f.read()
                 data = json.loads(content)
                 if isinstance(data, dict):
-                    return [data]
+                    return [{str(value): data}]
                 return []
         async with aiofiles.open(
             self._storage / table_name / ".json") as f:
@@ -273,7 +273,7 @@ class _DBasync(_AsyncDB):
                 content = await f.read()
                 d = json.loads(content)
                 if d[column_name] == value and isinstance(d, dict):
-                    result.append(d)
+                    result.append({str(name): d})
         return result
 
     def _check_column_in_table(self, table_name: str, column_name: str) -> bool:
@@ -292,3 +292,25 @@ class _DBasync(_AsyncDB):
             esist column
         """
         return column_name in self._meta[table_name][META.COLUMNS]
+
+    async def update(self,
+               table_name: str,
+               file_id: str,
+               new_data: dict[str, Any],
+               ) -> None:
+        """Update data with file_id.
+
+        Get file_id from find method.
+
+        Parameters
+        ----------
+        file_id : str
+            unical file name
+        new_data : dict[str, Any]
+            new data when need save
+        """
+        table_name = self._meta[META.TABLE_PREFIX] + table_name
+        async with aiofiles.open(
+            self._storage / table_name / f"{file_id}.json",
+            mode="w") as f:
+            await f.write(json.dumps(new_data))

@@ -215,7 +215,7 @@ class _DBsync(_DB):
                     mode="r") as f:
                 data = json.load(f)
                 if isinstance(data, dict):
-                    return [data]
+                    return [{str(value): data}]
                 return []
         with Path.open(
             self._storage / table_name / ".json",mode="r") as f:
@@ -228,7 +228,7 @@ class _DBsync(_DB):
                     mode="r") as f:
                 d = json.load(f)
                 if d[column_name] == value and isinstance(d, dict):
-                    result.append(d)
+                    result.append({str(name): d})
         return result
 
     def _check_column_in_table(self, table_name: str, column_name: str) -> bool:
@@ -275,3 +275,26 @@ class _DBsync(_DB):
                 return str(value)
             case _:
                 raise UnknownDataTypeError
+
+
+    def update(self,
+               table_name: str,
+               file_id: str,
+               new_data: dict[str, Any],
+               ) -> None:
+        """Update data with file_id.
+
+        Get file_id from find method.
+
+        Parameters
+        ----------
+        file_id : str
+            unical file name
+        new_data : dict[str, Any]
+            new data when need save
+        """
+        table_name = self._meta[META.TABLE_PREFIX] + table_name
+        with Path.open(
+            self._storage / table_name / f"{file_id}.json",
+            mode="w") as f:
+            json.dump(new_data, f)

@@ -81,6 +81,24 @@ class _DB(ABC):
             all data in table
         """
 
+    @abstractmethod
+    def update(self,
+               table_name: str,
+               file_id: str,
+               new_data: dict[str, Any],
+               ) -> None:
+        """Update data with file_id.
+
+        Get file_id from find method.
+
+        Parameters
+        ----------
+        file_id : str
+            unical file name
+        new_data : dict[str, Any]
+            new data when need save
+        """
+
 class _AsyncDB(ABC):
     @abstractmethod
     def __init__(self, storage: str | Path, meta_file: str) -> None:
@@ -143,4 +161,22 @@ class _AsyncDB(ABC):
         -------
         list[dict[str, Any]]
             all data in table
+        """
+
+    @abstractmethod
+    async def update(self,
+                     table_name: str,
+                     file_id: str,
+                     new_data: dict[str, Any],
+                     ) -> None:
+        """Update data with file_id.
+
+        Get file_id from find method.
+
+        Parameters
+        ----------
+        file_id : str
+            unical file name
+        new_data : dict[str, Any]
+            new data when need save
         """
