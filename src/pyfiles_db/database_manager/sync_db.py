@@ -24,7 +24,7 @@ from pyfiles_db.errors import (
     DataIsUncorrectError,
     NotFoundColumnError,
     NotFoundTableError,
-    TableAlredyAvaibleError,
+    TableAlreadyAvaibleError,
     UnknownDataTypeError,
 )
 from pyfiles_db.utils import infinite_natural_numbers
@@ -35,14 +35,14 @@ if TYPE_CHECKING:
 
 class _DBsync(_DB):
     def __init__(self, storage: str | Path, meta_file: str) -> None:
-        """Init databs.
+        """Initialize the synchronous database manager.
 
         Parameters
         ----------
         storage : str | Path
-            path to db location
+            Path to the database location.
         meta_file : str
-           name of meta file
+            Name of the meta file.
         """
         self._storage = Path(storage)
         self._meta_file = meta_file
@@ -56,26 +56,26 @@ class _DBsync(_DB):
 
     def create_table(self, table_name: str, columns: dict[str, str],
                      id_generator: str | int | None = None) -> None:
-        """Create table.
+        """Create a table (sync).
 
         Parameters
         ----------
         table_name : str
-            name of table
+            Name of the table.
         columns : dict[str, str]
-            columns with data type
+            Columns mapping to their data types.
         id_generator : str | None
-           generator for name of file. Default None
+            Generator for file names. Default None.
 
         Raises
         ------
-        TableAlredyAvaibleError
-            if table alredy avaible
+        TableAlreadyAvaibleError
+            If the table already exists.
         """
         # Table. columns is maybe {"USER_ID": "INT", "NAME": "TEXT"}
         table = self._meta[META.TABLE_PREFIX] + table_name
         if table in self._meta[META.TABLES]:
-            raise TableAlredyAvaibleError
+            raise TableAlreadyAvaibleError
         if id_generator is None:
             id_generator = 0
             self._id_generators[table] = infinite_natural_numbers(id_generator)
@@ -92,26 +92,26 @@ class _DBsync(_DB):
             json.dump(self._meta, f)
 
     def _mkdir_for_table(self, table: str | Path) -> None:
-        """Make table foleder.
+        """Create the on-disk folder and index file for a table.
 
         Parameters
         ----------
         table : str | Path
-            name of table folder
+            Name of the table folder.
         """
         (self._storage / table).mkdir(parents=False, exist_ok=True)
         with Path.open(self._storage / table / ".json", mode="w") as f:
             json.dump({META.FILE_IDS: []}, f)
 
     def new_data(self, table_name: str, data: dict[str, Any]) -> None:
-        """Save new data to table.
+        """Save new data to the table.
 
         Parameters
         ----------
         table_name : str
-            name of need table
+            Name of the table.
         data : dict[str, Any]
-            information when need save
+            Record to save.
         """
         table_name = self._meta[META.TABLE_PREFIX] + table_name
         if not self._check_table(table_name):
@@ -140,35 +140,35 @@ class _DBsync(_DB):
             json.dump(data, f)
 
     def _check_table(self, table: str) -> bool:
-        """Check table for exists.
+        """Check whether a table exists.
 
         Parameters
         ----------
         table : str
-            name of table
+            Name of the table.
 
         Returns
         -------
         bool
-            exist table
+            True if the table exists.
         """
         return table in self._meta[META.TABLES]
 
     def _check_data(self, columns: dict[str, str],
                     data: dict[str, Any]) -> bool:
-        """Check type data.
+        """Validate data types for a record against table columns.
 
         Parameters
         ----------
         columns : dict[str, str]
-            col of table
+            Column definitions for the table.
         data : dict[str, Any]
-            new information
+            Record to validate.
 
         Returns
         -------
         bool
-            Data is correct
+            True if the record matches the declared column types.
         """
         for key, val in data.items():
             if (self._change_type(val, columns[key]) != val):
@@ -179,26 +179,24 @@ class _DBsync(_DB):
              table_name: str,
              condition: str,
              ) -> list[dict[str, Any]]:
-        """Find information in table.
+        """Find records in a table matching a simple condition.
 
         Parameters
         ----------
         table_name : str
-            name of table
+            Name of the table.
         condition : str
-            condition, maybe "id == 5"
+            Condition string, e.g. "id == 5".
 
         Returns
         -------
         list[dict[str, Any]]
-            all data when find condition
+            Records that match the condition.
 
         Raises
         ------
         ValueError
-            Table not found error
-        ValueError
-            Column not found error
+            Table not found or column not found.
         """
         table_name = self._meta[META.TABLE_PREFIX] + table_name
         if not self._check_table(table_name):
@@ -232,7 +230,7 @@ class _DBsync(_DB):
         return result
 
     def _check_column_in_table(self, table_name: str, column_name: str) -> bool:
-        """Chech column in table on exist.
+        """Check column in table on exist.
 
         Parameters
         ----------
@@ -244,7 +242,7 @@ class _DBsync(_DB):
         Returns
         -------
         bool
-            esist column
+            exist column
         """
         return column_name in self._meta[table_name][META.COLUMNS]
 
@@ -289,7 +287,7 @@ class _DBsync(_DB):
         Parameters
         ----------
         file_id : str
-            unical file name
+            unique  file name
         new_data : dict[str, Any]
             new data when need save
         """

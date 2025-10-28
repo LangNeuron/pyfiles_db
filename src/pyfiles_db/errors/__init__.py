@@ -20,7 +20,7 @@ from .error_data_is_uncorrect import DataIsUncorrectError
 from .error_db_not_loaded import DbNotLoadedError
 from .error_not_found import NotFoundColumnError, NotFoundTableError
 from .error_unknown_data_type import UnknownDataTypeError
-from .table_already_exist import TableAlredyAvaibleError
+from .table_already_exist import TableAlreadyAvaibleError
 
 __all__ = [
            "DataIsUncorrectError",
@@ -28,6 +28,6 @@ __all__ = [
            "NotFoundColumnError",
            "NotFoundTableError",
            "PathNotAvaibleError",
-           "TableAlredyAvaibleError",
+           "TableAlreadyAvaibleError",
            "UnknownDataTypeError",
 ]

@@ -12,23 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Eror DbNotLoadedError."""
+"""Errors for table already exists condition."""
 
-class TableAlredyAvaibleError(Exception):
-    """Error DbNotLoadedError.
+class TableAlreadyAvaibleError(Exception):
+    """Raised when trying to create a table that already exists.
 
-    Parameters
-    ----------
-    FileNotFoundError : _type_
-        File exception
+    Note: class name preserves historical spelling for backward
+    compatibility with existing code and tests.
     """
 
     def __str__(self) -> str:
-        """Print Exception.
-
-        Returns
-        -------
-        str
-            String info message
-        """
-        return "Table alredy avaible"
+        """Return a readable message for this exception."""
+        return "Table already available"
