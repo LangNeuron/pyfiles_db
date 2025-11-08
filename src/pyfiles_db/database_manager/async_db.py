@@ -149,7 +149,7 @@ class _DBasync(_AsyncDB):
             self._storage / table_name / ".json") as f:
             content = await f.read()
             data = json.loads(content)
-            data[META.FILE_IDS].append(file_name)
+            data[META.FILE_IDS].append(str(file_name))
         async with aiofiles.open(
             self._storage / table_name / ".json", mode="w") as f:
             await f.write(json.dumps(data))
@@ -254,12 +254,15 @@ class _DBasync(_AsyncDB):
         value = self._change_type(value,
                                   self._meta[table_name][META.COLUMNS][column_name])
         if self._meta[table_name][META.GENERATOR] == column_name:
-            async with aiofiles.open(
+            try:
+                async with aiofiles.open(
                     self._storage / table_name / f"{value}.json") as f:
-                content = await f.read()
-                data = json.loads(content)
-                if isinstance(data, dict):
-                    return [{str(value): data}]
+                    content = await f.read()
+                    data = json.loads(content)
+                    if isinstance(data, dict):
+                        return [{str(value): data}]
+                    return []
+            except FileNotFoundError:
                 return []
         async with aiofiles.open(
             self._storage / table_name / ".json") as f:
@@ -332,3 +335,10 @@ class _DBasync(_AsyncDB):
         if not (self._storage / table_name / f"{file_id}.json").exists():
             raise FileNotFoundError
         (self._storage / table_name / f"{file_id}.json").unlink()
+        async with aiofiles.open(self._storage / table_name / ".json") as f:
+            data = json.loads(await f.read())
+        data[META.FILE_IDS].remove(str(file_id))
+        async with aiofiles.open(
+            self._storage / table_name / ".json",
+            "w") as f:
+            await f.write(json.dumps(data))

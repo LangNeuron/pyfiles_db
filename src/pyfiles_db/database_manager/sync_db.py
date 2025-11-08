@@ -135,7 +135,7 @@ class _DBsync(_DB):
             json.dump(data, f)
         with Path.open(self._storage / table_name / ".json", mode="r") as f:
             data = json.load(f)
-            data[META.FILE_IDS].append(file_name)
+            data[META.FILE_IDS].append(str(file_name))
         with Path.open(self._storage / table_name / ".json", mode="w") as f:
             json.dump(data, f)
 
@@ -208,12 +208,15 @@ class _DBsync(_DB):
         value = self._change_type(value,
                                   self._meta[table_name][META.COLUMNS][column_name])
         if self._meta[table_name][META.GENERATOR] == column_name:
-            with Path.open(
+            try:
+                with Path.open(
                     self._storage / table_name / f"{value}.json",
                     mode="r") as f:
-                data = json.load(f)
-                if isinstance(data, dict):
-                    return [{str(value): data}]
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        return [{str(value): data}]
+                    return []
+            except FileNotFoundError:
                 return []
         with Path.open(
             self._storage / table_name / ".json",mode="r") as f:
@@ -314,3 +317,8 @@ class _DBsync(_DB):
         if not (self._storage / table_name / f"{file_id}.json").exists():
             raise FileNotFoundError
         (self._storage / table_name / f"{file_id}.json").unlink()
+        with Path.open(self._storage / table_name / ".json") as f:
+            data = json.load(f)
+        data[META.FILE_IDS].remove(str(file_id))
+        with Path.open(self._storage / table_name / ".json", "w") as f:
+            json.dump(data, f)
