@@ -85,3 +85,29 @@ async def test_async_delete() -> None:
         pass
     except Exception:
         raise
+
+def test_sync_deleate_error() -> None:
+    """Test sync delete error with find."""
+    file_db = FilesDB()
+    db = file_db.init_sync()
+    db.create_table("t", {"id": "INT"}, id_generator="id")
+    db.new_data("t", {"id": 0})
+    res_id = next(iter(db.find("t", "id == 0")[0].keys()))
+    db.delete("t", res_id)
+    r = db.find("t", "id == 0") # error line
+    if r != []:
+        raise ValueError
+
+@pytest.mark.asyncio
+async def test_async_deleate_error() -> None:
+    """Test sync delete error with find."""
+    file_db = FilesDB()
+    db = file_db.init_async()
+    await db.create_table("t", {"id": "INT"}, id_generator="id")
+    await db.new_data("t", {"id": 0})
+    res_id = next(iter((await db.find("t", "id == 0"))[0].keys()))
+    await db.delete("t", res_id)
+    r = await db.find("t", "id == 0") # error line
+    if r != []:
+        raise ValueError
+
