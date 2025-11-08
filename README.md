@@ -2,7 +2,7 @@
 Lightweight file-system database for Python projects
 
 ```
-PRE RELISE FIRST VERSION OF PYFILES_D
+PRE RELISE FIRST VERSION OF PYFILES_DB
 ```
 
 ## About  
